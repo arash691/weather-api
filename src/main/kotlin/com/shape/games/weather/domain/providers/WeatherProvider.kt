@@ -122,8 +122,4 @@ data class WeatherProviderConfig(
  */
 enum class WeatherProviderType {
     OPENWEATHERMAP,
-    ACCUWEATHER,
-    WEATHERAPI,
-    DARK_SKY,
-    WEATHERBIT
 }

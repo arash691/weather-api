@@ -5,9 +5,9 @@ import com.shape.games.com.shape.games.weather.infrastructure.config.configureHT
 import com.shape.games.com.shape.games.weather.infrastructure.config.configureMonitoring
 import com.shape.games.com.shape.games.weather.infrastructure.config.configureSerialization
 import com.shape.games.com.shape.games.weather.infrastructure.config.configureStatusPages
+import com.shape.games.weather.infrastructure.api.controllers.WeatherController
 import com.shape.games.weather.infrastructure.config.AppConfig
 import com.shape.games.weather.infrastructure.di.DependencyInjection
-import com.shape.games.weather.presentation.controllers.WeatherController
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -23,7 +23,7 @@ fun Application.module() {
     
     // Create weather controller with application service
     val weatherController = WeatherController(
-        weatherService = dependencyInjection.weatherApplicationService()
+        weatherService = dependencyInjection.weatherService()
     )
     
     // Configure Ktor plugins

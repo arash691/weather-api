@@ -1,7 +1,7 @@
-package com.shape.games.weather.presentation.controllers
+package com.shape.games.weather.infrastructure.api.controllers
 
+import com.shape.games.weather.application.WeatherService
 import com.shape.games.weather.domain.exceptions.NotFoundException
-import com.shape.games.weather.application.services.WeatherService
 import com.shape.games.weather.presentation.dto.*
 import io.ktor.http.*
 import io.ktor.server.application.*

@@ -1,14 +1,14 @@
-package com.shape.games.weather.application.services
+package com.shape.games.weather.application
 
 import com.shape.games.weather.domain.exceptions.RateLimitExceededException
 import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
-import com.shape.games.weather.domain.cache.CacheProvider
 import com.shape.games.weather.domain.entities.*
-import com.shape.games.weather.domain.providers.WeatherProvider
 import com.shape.games.weather.domain.ratelimit.RateLimitProvider
+import com.shape.games.weather.domain.repositories.WeatherRepository
 import com.shape.games.weather.domain.services.WeatherRequestValidationService
 import com.shape.games.weather.domain.valueobjects.Coordinates
-import com.shape.games.weather.presentation.dto.*
+import com.shape.games.weather.domain.valueobjects.Temperature
+import com.shape.games.weather.presentation.dto.LocationSummaryDto
 import org.slf4j.LoggerFactory
 
 /**
@@ -16,11 +16,8 @@ import org.slf4j.LoggerFactory
  * Orchestrates domain services and handles cross-cutting concerns
  */
 class WeatherService(
-    private val weatherProvider: WeatherProvider,
+    private val weatherRepository: WeatherRepository,
     private val rateLimitProvider: RateLimitProvider,
-    private val weatherCache: CacheProvider<String, WeatherData>,
-    private val forecastCache: CacheProvider<String, WeatherForecast>,
-    private val locationCache: CacheProvider<String, Location>,
     private val validationService: WeatherRequestValidationService = WeatherRequestValidationService()
 ) {
     
@@ -114,7 +111,7 @@ class WeatherService(
     
     private suspend fun getLocationSummary(
         coordinates: Coordinates,
-        temperatureThreshold: com.shape.games.weather.domain.valueobjects.Temperature
+        temperatureThreshold: Temperature
     ): LocationSummaryDto? {
         val location = getLocationByCoordinates(coordinates) ?: return null
         val forecast = getForecastForLocation(location) ?: return null
@@ -127,7 +124,7 @@ class WeatherService(
             ?: return null
         
         // Convert domain temperature to check threshold
-        val maxTempDomain = com.shape.games.weather.domain.valueobjects.Temperature.celsius(
+        val maxTempDomain = Temperature.celsius(
             tomorrowForecast.temperatureMax.celsius
         )
         
@@ -146,26 +143,12 @@ class WeatherService(
     }
     
     private suspend fun getLocationByCoordinates(coordinates: Coordinates): Location? {
-        val cacheKey = coordinates.toCoordinateString()
-        return locationCache.get(cacheKey) ?: run {
-            val result = weatherProvider.getLocationDetails(coordinates.latitude, coordinates.longitude)
-            val location = result.getOrNull()
-            if (location != null) {
-                locationCache.put(cacheKey, location)
-            }
-            location
-        }
+        val locationId = coordinates.toCoordinateString()
+        return weatherRepository.getLocationById(locationId)
     }
     
     private suspend fun getForecastForLocation(location: Location): WeatherForecast? {
-        return forecastCache.get(location.id) ?: run {
-            val result = weatherProvider.getForecast(location.latitude, location.longitude, 5)
-            val forecast = result.getOrNull()
-            if (forecast != null) {
-                forecastCache.put(location.id, forecast)
-            }
-            forecast
-        }
+        return weatherRepository.getForecast(location, 5)
     }
 }
 

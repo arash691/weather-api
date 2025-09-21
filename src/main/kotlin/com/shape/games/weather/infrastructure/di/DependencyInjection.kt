@@ -1,6 +1,8 @@
 package com.shape.games.weather.infrastructure.di
 
-import com.shape.games.weather.application.services.WeatherService
+import com.shape.games.weather.application.WeatherService
+import com.shape.games.weather.domain.repositories.WeatherRepository
+import com.shape.games.weather.infrastructure.repositories.WeatherRepositoryImpl
 import com.shape.games.weather.domain.cache.CacheConfig
 import com.shape.games.weather.domain.cache.CacheProvider
 import com.shape.games.weather.domain.cache.CacheProviderType
@@ -36,12 +38,12 @@ class DependencyInjection(private val config: WeatherConfig) {
     
     private val logger = LoggerFactory.getLogger(DependencyInjection::class.java)
     
-    // Factories
+
     private val weatherProviderFactory = WeatherProviderFactory()
     private val cacheProviderFactory = CacheProviderFactory()
     private val rateLimitProviderFactory = RateLimitProviderFactory()
     
-    // HTTP Client (singleton)
+
     private val httpClient: HttpClient by lazy {
         logger.info("Initializing HTTP client")
         HttpClient(CIO) {
@@ -71,8 +73,7 @@ class DependencyInjection(private val config: WeatherConfig) {
             }
         }
     }
-    
-    // Weather Provider (singleton)
+
     private val weatherProvider: WeatherProvider by lazy {
         logger.info("Initializing weather provider: {}", config.weatherProvider.type)
         val providerConfig = WeatherProviderConfig(
@@ -84,7 +85,7 @@ class DependencyInjection(private val config: WeatherConfig) {
         weatherProviderFactory.createProvider(providerConfig, httpClient)
     }
     
-    // Rate Limit Provider (singleton)
+
     private val rateLimitProvider: RateLimitProvider by lazy {
         logger.info("Initializing rate limit provider: {}", config.rateLimit.algorithm)
         val rateLimitConfig = RateLimitConfig(
@@ -96,7 +97,7 @@ class DependencyInjection(private val config: WeatherConfig) {
         rateLimitProviderFactory.createProvider(rateLimitConfig)
     }
     
-    // Cache Providers (singletons)
+
     private val weatherCache: CacheProvider<String, WeatherData> by lazy {
         logger.info("Initializing weather cache provider: {}", config.cache.weather.provider)
         val cacheConfig = CacheConfig(
@@ -130,29 +131,36 @@ class DependencyInjection(private val config: WeatherConfig) {
         cacheProviderFactory.createProvider(cacheConfig)
     }
     
-    // Weather Application Service (singleton) - DDD approach
-    private val weatherService: WeatherService by lazy {
-        logger.info("Initializing weather application service")
-        WeatherService(
+    // Weather Repository (singleton)
+    private val weatherRepository: WeatherRepository by lazy {
+        logger.info("Initializing weather repository")
+        WeatherRepositoryImpl(
             weatherProvider = weatherProvider,
-            rateLimitProvider = rateLimitProvider,
             weatherCache = weatherCache,
             forecastCache = forecastCache,
             locationCache = locationCache
         )
     }
     
+    // Weather Service (singleton) - DDD approach
+    private val weatherService: WeatherService by lazy {
+        logger.info("Initializing weather application service")
+        WeatherService(
+            weatherRepository = weatherRepository,
+            rateLimitProvider = rateLimitProvider
+        )
+    }
+
     // Public getters for dependency injection
-    fun weatherApplicationService(): WeatherService = weatherService
+    fun weatherService(): WeatherService = weatherService
+    fun weatherRepository(): WeatherRepository = weatherRepository
     fun weatherProvider(): WeatherProvider = weatherProvider
     fun rateLimitProvider(): RateLimitProvider = rateLimitProvider
     fun weatherCache(): CacheProvider<String, WeatherData> = weatherCache
     fun forecastCache(): CacheProvider<String, WeatherForecast> = forecastCache
     fun locationCache(): CacheProvider<String, Location> = locationCache
     
-    /**
-     * Clean up resources when the application shuts down
-     */
+
     fun cleanup() {
         logger.info("Cleaning up dependencies")
         try {
