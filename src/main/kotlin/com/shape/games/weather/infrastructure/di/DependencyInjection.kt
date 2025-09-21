@@ -1,7 +1,6 @@
 package com.shape.games.weather.infrastructure.di
 
 import com.shape.games.weather.application.services.WeatherService
-import com.shape.games.weather.application.services.WeatherApplicationService
 import com.shape.games.weather.domain.cache.CacheConfig
 import com.shape.games.weather.domain.cache.CacheProvider
 import com.shape.games.weather.domain.cache.CacheProviderType
@@ -27,7 +26,6 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -132,22 +130,10 @@ class DependencyInjection(private val config: WeatherConfig) {
         cacheProviderFactory.createProvider(cacheConfig)
     }
     
-    // Weather Service (singleton)
-    private val weatherService: WeatherService by lazy {
-        logger.info("Initializing weather service")
-        WeatherService(
-            weatherProvider = weatherProvider,
-            rateLimitProvider = rateLimitProvider,
-            weatherCache = weatherCache,
-            forecastCache = forecastCache,
-            locationCache = locationCache
-        )
-    }
-
     // Weather Application Service (singleton) - DDD approach
-    private val weatherApplicationService: WeatherApplicationService by lazy {
+    private val weatherService: WeatherService by lazy {
         logger.info("Initializing weather application service")
-        WeatherApplicationService(
+        WeatherService(
             weatherProvider = weatherProvider,
             rateLimitProvider = rateLimitProvider,
             weatherCache = weatherCache,
@@ -157,8 +143,7 @@ class DependencyInjection(private val config: WeatherConfig) {
     }
     
     // Public getters for dependency injection
-    fun weatherService(): WeatherService = weatherService
-    fun weatherApplicationService(): WeatherApplicationService = weatherApplicationService
+    fun weatherApplicationService(): WeatherService = weatherService
     fun weatherProvider(): WeatherProvider = weatherProvider
     fun rateLimitProvider(): RateLimitProvider = rateLimitProvider
     fun weatherCache(): CacheProvider<String, WeatherData> = weatherCache

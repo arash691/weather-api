@@ -1,7 +1,7 @@
 package com.shape.games.weather.presentation.controllers
 
-import com.shape.games.com.shape.games.weather.infrastructure.config.NotFoundException
-import com.shape.games.weather.application.services.WeatherApplicationService
+import com.shape.games.weather.domain.exceptions.NotFoundException
+import com.shape.games.weather.application.services.WeatherService
 import com.shape.games.weather.presentation.dto.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -13,7 +13,7 @@ import java.time.Instant
  * Controller handling weather-related HTTP endpoints
  */
 class WeatherController(
-    private val weatherApplicationService: WeatherApplicationService
+    private val weatherService: WeatherService
 ) {
     
     private val logger = LoggerFactory.getLogger(WeatherController::class.java)
@@ -29,7 +29,7 @@ class WeatherController(
         val unitParam = call.request.queryParameters["unit"]
         
         // Delegate to application service (domain validation happens there)
-        val summaries = weatherApplicationService.getWeatherSummaryForFavorites(
+        val summaries = weatherService.getWeatherSummaryForFavorites(
             locationsParam, temperatureParam, unitParam
         )
         
@@ -51,7 +51,7 @@ class WeatherController(
         val locationParam = call.parameters["locationId"]
         
         // Delegate to application service (domain validation happens there)
-        val weatherDetails = weatherApplicationService.getLocationWeatherDetails(locationParam)
+        val weatherDetails = weatherService.getLocationWeatherDetails(locationParam)
             ?: throw NotFoundException("Location not found")
         
         // Format response (infrastructure concern)
@@ -84,7 +84,7 @@ class WeatherController(
     private suspend fun createResponseMetadata(): ResponseMetadata {
         return ResponseMetadata(
             timestamp = Instant.now().toString(),
-            rateLimitRemaining = weatherApplicationService.getRemainingRequests()
+            rateLimitRemaining = weatherService.getRemainingRequests()
         )
     }
     

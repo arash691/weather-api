@@ -1,7 +1,7 @@
 package com.shape.games.weather.application.services
 
-import com.shape.games.com.shape.games.weather.infrastructure.config.RateLimitExceededException
-import com.shape.games.com.shape.games.weather.infrastructure.config.ServiceUnavailableException
+import com.shape.games.weather.domain.exceptions.RateLimitExceededException
+import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
 import com.shape.games.weather.domain.cache.CacheProvider
 import com.shape.games.weather.domain.entities.*
 import com.shape.games.weather.domain.providers.WeatherProvider
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
  * Application service for weather operations
  * Orchestrates domain services and handles cross-cutting concerns
  */
-class WeatherApplicationService(
+class WeatherService(
     private val weatherProvider: WeatherProvider,
     private val rateLimitProvider: RateLimitProvider,
     private val weatherCache: CacheProvider<String, WeatherData>,
@@ -24,7 +24,7 @@ class WeatherApplicationService(
     private val validationService: WeatherRequestValidationService = WeatherRequestValidationService()
 ) {
     
-    private val logger = LoggerFactory.getLogger(WeatherApplicationService::class.java)
+    private val logger = LoggerFactory.getLogger(WeatherService::class.java)
     
     /**
      * Get weather summary for favorite locations where temperature will be above threshold

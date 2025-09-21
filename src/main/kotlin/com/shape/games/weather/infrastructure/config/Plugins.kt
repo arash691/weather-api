@@ -1,5 +1,8 @@
 package com.shape.games.com.shape.games.weather.infrastructure.config
 
+import com.shape.games.weather.domain.exceptions.NotFoundException
+import com.shape.games.weather.domain.exceptions.RateLimitExceededException
+import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
 import com.shape.games.weather.presentation.dto.ErrorResponse
 import com.shape.games.weather.presentation.dto.ErrorDetails
 import com.shape.games.weather.presentation.dto.ResponseMetadata
@@ -172,9 +175,3 @@ suspend fun ApplicationCall.respondError(
     respond(status, errorResponse)
 }
 
-/**
- * Custom exceptions for the application
- */
-class NotFoundException(message: String) : Exception(message)
-class RateLimitExceededException(message: String) : Exception(message)
-class ServiceUnavailableException(message: String) : Exception(message)

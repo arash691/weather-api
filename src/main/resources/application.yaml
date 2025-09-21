@@ -1,5 +1,9 @@
-# Weather API Configuration
-# Supports multiple providers and algorithms
+ktor:
+  application:
+    modules:
+      - com.shape.games.ApplicationKt.module
+  deployment:
+    port: 8080
 
 weather:
   provider:

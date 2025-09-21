@@ -23,7 +23,7 @@ fun Application.module() {
     
     // Create weather controller with application service
     val weatherController = WeatherController(
-        weatherApplicationService = dependencyInjection.weatherApplicationService()
+        weatherService = dependencyInjection.weatherApplicationService()
     )
     
     // Configure Ktor plugins

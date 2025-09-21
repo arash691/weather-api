@@ -9,11 +9,11 @@ data class Coordinates private constructor(
     val longitude: Double
 ) {
     init {
-        require(latitude in -90.0..90.0) { 
-            "Latitude must be between -90 and 90 degrees, got: $latitude" 
+        require(latitude in -90.0..90.0) {
+            "Latitude must be between -90 and 90 degrees, got: $latitude"
         }
-        require(longitude in -180.0..180.0) { 
-            "Longitude must be between -180 and 180 degrees, got: $longitude" 
+        require(longitude in -180.0..180.0) {
+            "Longitude must be between -180 and 180 degrees, got: $longitude"
         }
     }
 
@@ -37,19 +37,24 @@ data class Coordinates private constructor(
         fun fromString(coordinateString: String): Result<Coordinates> {
             return try {
                 val parts = coordinateString.trim().split(",")
-                require(parts.size == 2) { 
-                    "Coordinate string must contain exactly 2 parts separated by comma" 
+                require(parts.size == 2) {
+                    "Coordinate string must contain exactly 2 parts separated by comma"
                 }
 
                 val lat = parts[0].trim().toDoubleOrNull()
                     ?: return Result.failure(IllegalArgumentException("Invalid latitude: '${parts[0]}'"))
-                
+
                 val lon = parts[1].trim().toDoubleOrNull()
                     ?: return Result.failure(IllegalArgumentException("Invalid longitude: '${parts[1]}'"))
 
                 Result.success(Coordinates(lat, lon))
             } catch (e: Exception) {
-                Result.failure(IllegalArgumentException("Invalid coordinate format: '$coordinateString'. Expected format: 'lat,lon'", e))
+                Result.failure(
+                    IllegalArgumentException(
+                        "Invalid coordinate format: '$coordinateString'. Expected format: 'lat,lon'",
+                        e
+                    )
+                )
             }
         }
 
@@ -60,11 +65,11 @@ data class Coordinates private constructor(
         fun fromMultipleString(coordinatesString: String): Result<List<Coordinates>> {
             return try {
                 val parts = coordinatesString.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-                
+
                 if (parts.size < 2) {
                     return Result.failure(IllegalArgumentException("At least one coordinate pair required"))
                 }
-                
+
                 if (parts.size % 2 != 0) {
                     return Result.failure(IllegalArgumentException("Coordinates must be in pairs (lat,lon)"))
                 }
@@ -75,7 +80,7 @@ data class Coordinates private constructor(
                         ?: return Result.failure(IllegalArgumentException("Invalid latitude: '${parts[i]}'"))
                     val lon = parts[i + 1].toDoubleOrNull()
                         ?: return Result.failure(IllegalArgumentException("Invalid longitude: '${parts[i + 1]}'"))
-                    
+
                     coordinates.add(Coordinates(lat, lon))
                 }
 

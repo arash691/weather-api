@@ -1,5 +1,7 @@
 package com.shape.games.weather.domain.valueobjects
 
+import com.shape.games.weather.domain.exceptions.TemperatureValidationException
+
 /**
  * Value object representing a temperature value with unit
  * Encapsulates temperature conversion and validation logic
