@@ -1,17 +1,13 @@
 package com.shape.games.weather.application.services
 
-import com.shape.games.RateLimitExceededException
-import com.shape.games.ServiceUnavailableException
+import com.shape.games.com.shape.games.weather.infrastructure.config.RateLimitExceededException
+import com.shape.games.com.shape.games.weather.infrastructure.config.ServiceUnavailableException
 import com.shape.games.weather.domain.cache.CacheProvider
 import com.shape.games.weather.domain.entities.*
 import com.shape.games.weather.domain.providers.WeatherProvider
 import com.shape.games.weather.domain.ratelimit.RateLimitProvider
 import com.shape.games.weather.presentation.dto.*
 import org.slf4j.LoggerFactory
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.plus
-import kotlinx.datetime.DateTimeUnit
 
 /**
  * Application service for weather operations

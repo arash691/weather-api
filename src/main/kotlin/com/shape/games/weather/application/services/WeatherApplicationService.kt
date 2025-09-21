@@ -1,7 +1,7 @@
 package com.shape.games.weather.application.services
 
-import com.shape.games.RateLimitExceededException
-import com.shape.games.ServiceUnavailableException
+import com.shape.games.com.shape.games.weather.infrastructure.config.RateLimitExceededException
+import com.shape.games.com.shape.games.weather.infrastructure.config.ServiceUnavailableException
 import com.shape.games.weather.domain.cache.CacheProvider
 import com.shape.games.weather.domain.entities.*
 import com.shape.games.weather.domain.providers.WeatherProvider

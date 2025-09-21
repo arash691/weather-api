@@ -1,4 +1,4 @@
-package com.shape.games
+package com.shape.games.com.shape.games.weather.infrastructure.config
 
 import com.shape.games.weather.presentation.dto.ErrorResponse
 import com.shape.games.weather.presentation.dto.ErrorDetails

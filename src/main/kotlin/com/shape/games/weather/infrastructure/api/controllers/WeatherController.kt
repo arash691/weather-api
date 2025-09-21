@@ -1,18 +1,16 @@
 package com.shape.games.weather.presentation.controllers
 
-import com.shape.games.NotFoundException
+import com.shape.games.com.shape.games.weather.infrastructure.config.NotFoundException
 import com.shape.games.weather.application.services.WeatherApplicationService
 import com.shape.games.weather.presentation.dto.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 /**
  * Controller handling weather-related HTTP endpoints
- * Focuses only on HTTP concerns - parameter extraction and response formatting
- * Domain validation is handled by domain services (DDD approach)
- * Exception handling is done globally
  */
 class WeatherController(
     private val weatherApplicationService: WeatherApplicationService
@@ -85,7 +83,7 @@ class WeatherController(
     
     private suspend fun createResponseMetadata(): ResponseMetadata {
         return ResponseMetadata(
-            timestamp = java.time.Instant.now().toString(),
+            timestamp = Instant.now().toString(),
             rateLimitRemaining = weatherApplicationService.getRemainingRequests()
         )
     }
