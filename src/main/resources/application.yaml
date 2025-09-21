@@ -1,0 +1,62 @@
+# Weather API Configuration
+# Supports multiple providers and algorithms
+
+weather:
+  provider:
+    type: "OPENWEATHERMAP"  # OPENWEATHERMAP, ACCUWEATHER, WEATHERAPI, DARK_SKY, WEATHERBIT
+    fallbackEnabled: false
+    fallbackProvider: null
+
+openweathermap:
+  apiKey: "84122ac0f70cdf7276c1a457f6a44b37"
+  baseUrl: "https://api.openweathermap.org"
+  timeoutMs: 30000
+
+rateLimit:
+  algorithm: "TOKEN_BUCKET"  # TOKEN_BUCKET, SLIDING_WINDOW, FIXED_WINDOW, LEAKY_BUCKET
+  maxRequestsPerDay: 10000
+  windowSizeDays: 1
+  burstAllowance: 0.2  # 20% burst allowance
+  refillRate: null  # requests per second (auto-calculated if null)
+
+cache:
+  weather:
+    provider: "CAFFEINE"  # CAFFEINE, REDIS, HAZELCAST, EHCACHE, MEMORY
+    durationMinutes: 15
+  forecast:
+    provider: "CAFFEINE"
+    durationMinutes: 60
+  location:
+    provider: "CAFFEINE"
+    durationMinutes: 1440  # 24 hours
+  maxCacheSize: 1000
+
+# Example configurations for different environments
+
+# Development with Redis cache
+# cache:
+#   weather:
+#     provider: "REDIS"
+#     durationMinutes: 15
+#   forecast:
+#     provider: "REDIS"
+#     durationMinutes: 60
+#   location:
+#     provider: "CAFFEINE"  # Keep location cache local
+#     durationMinutes: 1440
+
+# Production with multiple providers
+# weather:
+#   provider:
+#     type: "OPENWEATHERMAP"
+#     fallbackEnabled: true
+#     fallbackProvider: "ACCUWEATHER"
+
+# High-traffic with Hazelcast
+# cache:
+#   weather:
+#     provider: "HAZELCAST"
+#     durationMinutes: 10
+#   forecast:
+#     provider: "HAZELCAST"
+#     durationMinutes: 30
