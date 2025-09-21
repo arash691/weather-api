@@ -1,19 +1,13 @@
 package com.shape.games.weather.infrastructure.providers
 
-import com.shape.games.weather.domain.entities.Location
-import com.shape.games.weather.domain.entities.WeatherData
-import com.shape.games.weather.domain.entities.WeatherForecast
-import com.shape.games.weather.domain.entities.DailyForecast
-import com.shape.games.weather.domain.entities.Temperature
+import com.shape.games.weather.domain.entities.*
 import com.shape.games.weather.domain.providers.*
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import org.slf4j.LoggerFactory
-import kotlin.time.Duration
 
 /**
  * OpenWeatherMap implementation of WeatherProvider
@@ -23,20 +17,20 @@ class OpenWeatherMapProvider(
     private val httpClient: HttpClient,
     private val config: WeatherProviderConfig
 ) : WeatherProvider {
-    
+
     private val logger = LoggerFactory.getLogger(OpenWeatherMapProvider::class.java)
-    
+
     override suspend fun getCurrentWeather(latitude: Double, longitude: Double): WeatherResult<WeatherData> {
         return try {
             logger.debug("Fetching current weather for lat: {}, lon: {}", latitude, longitude)
-            
+
             val response = httpClient.get("${config.baseUrl}/data/2.5/weather") {
                 parameter("lat", latitude)
                 parameter("lon", longitude)
                 parameter("appid", config.apiKey)
                 parameter("units", "metric")
             }
-            
+
             if (response.status.isSuccess()) {
                 val weatherResponse = response.body<OpenWeatherMapWeatherResponse>()
                 val weatherData = weatherResponse.toWeatherData()
@@ -56,11 +50,11 @@ class OpenWeatherMapProvider(
             WeatherResult.Failure(WeatherProviderError.NetworkError(e.message ?: "Network error"))
         }
     }
-    
+
     override suspend fun getForecast(latitude: Double, longitude: Double, days: Int): WeatherResult<WeatherForecast> {
         return try {
             logger.debug("Fetching forecast for lat: {}, lon: {}, days: {}", latitude, longitude, days)
-            
+
             val response = httpClient.get("${config.baseUrl}/data/2.5/forecast") {
                 parameter("lat", latitude)
                 parameter("lon", longitude)
@@ -68,7 +62,7 @@ class OpenWeatherMapProvider(
                 parameter("units", "metric")
                 parameter("cnt", days * 8) // 8 forecasts per day (3-hour intervals)
             }
-            
+
             if (response.status.isSuccess()) {
                 val forecastResponse = response.body<OpenWeatherMapForecastResponse>()
                 val forecast = forecastResponse.toWeatherForecast()
@@ -88,17 +82,17 @@ class OpenWeatherMapProvider(
             WeatherResult.Failure(WeatherProviderError.NetworkError(e.message ?: "Network error"))
         }
     }
-    
+
     override suspend fun searchLocations(query: String): WeatherResult<List<Location>> {
         return try {
             logger.debug("Searching locations for query: {}", query)
-            
+
             val response = httpClient.get("${config.baseUrl}/geo/1.0/direct") {
                 parameter("q", query)
                 parameter("limit", 5)
                 parameter("appid", config.apiKey)
             }
-            
+
             if (response.status.isSuccess()) {
                 val locations = response.body<List<OpenWeatherMapLocationResponse>>()
                     .map { it.toLocation() }
@@ -118,18 +112,18 @@ class OpenWeatherMapProvider(
             WeatherResult.Failure(WeatherProviderError.NetworkError(e.message ?: "Network error"))
         }
     }
-    
+
     override suspend fun getLocationDetails(latitude: Double, longitude: Double): WeatherResult<Location> {
         return try {
             logger.debug("Getting location details for lat: {}, lon: {}", latitude, longitude)
-            
+
             val response = httpClient.get("${config.baseUrl}/geo/1.0/reverse") {
                 parameter("lat", latitude)
                 parameter("lon", longitude)
                 parameter("limit", 1)
                 parameter("appid", config.apiKey)
             }
-            
+
             if (response.status.isSuccess()) {
                 val locations = response.body<List<OpenWeatherMapLocationResponse>>()
                 if (locations.isNotEmpty()) {
@@ -153,7 +147,7 @@ class OpenWeatherMapProvider(
             WeatherResult.Failure(WeatherProviderError.NetworkError(e.message ?: "Network error"))
         }
     }
-    
+
     override suspend fun isHealthy(): Boolean {
         return try {
             val response = httpClient.get("${config.baseUrl}/data/2.5/weather") {
@@ -167,13 +161,13 @@ class OpenWeatherMapProvider(
             false
         }
     }
-    
+
     override suspend fun getRateLimitInfo(): RateLimitInfo? {
         // OpenWeatherMap doesn't provide rate limit info in response headers
         // This would need to be tracked separately
         return null
     }
-    
+
     override fun getProviderName(): String = "OpenWeatherMap"
 }
 
@@ -207,18 +201,32 @@ data class OpenWeatherMapLocationResponse(
 
 @Serializable
 data class Coord(val lat: Double, val lon: Double)
+
 @Serializable
 data class Weather(val id: Int, val main: String, val description: String, val icon: String)
+
 @Serializable
-data class Main(val temp: Double, val feels_like: Double, val temp_min: Double, val temp_max: Double, val pressure: Int, val humidity: Int)
+data class Main(
+    val temp: Double,
+    val feels_like: Double,
+    val temp_min: Double,
+    val temp_max: Double,
+    val pressure: Int,
+    val humidity: Int
+)
+
 @Serializable
 data class Wind(val speed: Double, val deg: Int)
+
 @Serializable
 data class Clouds(val all: Int)
+
 @Serializable
 data class Sys(val country: String, val sunrise: Long, val sunset: Long)
+
 @Serializable
 data class ForecastItem(val dt: Long, val main: Main, val weather: List<Weather>, val wind: Wind, val clouds: Clouds)
+
 @Serializable
 data class City(val name: String, val country: String, val coord: Coord)
 
@@ -254,7 +262,7 @@ private fun OpenWeatherMapForecastResponse.toWeatherForecast(): WeatherForecast 
                 .groupingBy { it }
                 .eachCount()
                 .maxByOrNull { it.value }?.key ?: "Unknown"
-            
+
             DailyForecast(
                 date = kotlinx.datetime.LocalDate.fromEpochDays((day.dt / 86400).toInt()),
                 temperatureMin = Temperature(minTemp),
@@ -265,7 +273,7 @@ private fun OpenWeatherMapForecastResponse.toWeatherForecast(): WeatherForecast 
                 pressure = day.main.pressure
             )
         }
-    
+
     return WeatherForecast(
         location = Location(
             id = "${city.coord.lat},${city.coord.lon}",

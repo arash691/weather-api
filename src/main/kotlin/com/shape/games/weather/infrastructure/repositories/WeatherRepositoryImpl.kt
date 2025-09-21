@@ -24,7 +24,7 @@ class WeatherRepositoryImpl(
 
     override suspend fun getCurrentWeather(location: Location): WeatherData? {
         val cacheKey = "weather_${location.id}"
-        
+
         // Try cache first
         weatherCache.get(cacheKey)?.let { cachedWeather ->
             logger.debug("Found cached weather data for location: {}", location.name)
@@ -36,12 +36,12 @@ class WeatherRepositoryImpl(
             logger.debug("Fetching weather data from provider for location: {}", location.name)
             val result = weatherProvider.getCurrentWeather(location.latitude, location.longitude)
             val weatherData = result.getOrNull()
-            
+
             if (weatherData != null) {
                 weatherCache.put(cacheKey, weatherData)
                 logger.debug("Cached weather data for location: {}", location.name)
             }
-            
+
             weatherData
         } catch (e: Exception) {
             logger.error("Failed to fetch weather data for location: {}", location.name, e)
@@ -51,7 +51,7 @@ class WeatherRepositoryImpl(
 
     override suspend fun getForecast(location: Location, days: Int): WeatherForecast? {
         val cacheKey = "forecast_${location.id}_${days}d"
-        
+
         // Try cache first
         forecastCache.get(cacheKey)?.let { cachedForecast ->
             logger.debug("Found cached forecast data for location: {}", location.name)
@@ -63,12 +63,12 @@ class WeatherRepositoryImpl(
             logger.debug("Fetching forecast data from provider for location: {}", location.name)
             val result = weatherProvider.getForecast(location.latitude, location.longitude, days)
             val forecast = result.getOrNull()
-            
+
             if (forecast != null) {
                 forecastCache.put(cacheKey, forecast)
                 logger.debug("Cached forecast data for location: {}", location.name)
             }
-            
+
             forecast
         } catch (e: Exception) {
             logger.error("Failed to fetch forecast data for location: {}", location.name, e)
@@ -92,7 +92,7 @@ class WeatherRepositoryImpl(
 
         val lat = parts[0].toDoubleOrNull()
         val lon = parts[1].toDoubleOrNull()
-        
+
         if (lat == null || lon == null) {
             logger.warn("Invalid coordinates in location ID: {}", locationId)
             return null
@@ -103,12 +103,12 @@ class WeatherRepositoryImpl(
             logger.debug("Fetching location data from provider for coordinates: {},{}", lat, lon)
             val result = weatherProvider.getLocationDetails(lat, lon)
             val location = result.getOrNull()
-            
+
             if (location != null) {
                 locationCache.put(locationId, location)
                 logger.debug("Cached location data for ID: {}", locationId)
             }
-            
+
             location
         } catch (e: Exception) {
             logger.error("Failed to fetch location data for ID: {}", locationId, e)
@@ -118,7 +118,7 @@ class WeatherRepositoryImpl(
 
     override suspend fun getLocationsByIds(locationIds: List<String>): List<Location> {
         val locations = mutableListOf<Location>()
-        
+
         for (locationId in locationIds) {
             try {
                 getLocationById(locationId)?.let { location ->
@@ -129,7 +129,7 @@ class WeatherRepositoryImpl(
                 // Continue with other locations
             }
         }
-        
+
         return locations
     }
 }

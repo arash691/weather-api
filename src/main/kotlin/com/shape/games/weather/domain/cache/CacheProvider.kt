@@ -7,21 +7,21 @@ import kotlin.time.Duration
  * Allows switching between different cache providers (Caffeine, Redis, Hazelcast, etc.)
  */
 interface CacheProvider<K : Any, V : Any> {
-    
+
     /**
      * Get value from cache
      * @param key The cache key
      * @return Cached value or null if not present
      */
     suspend fun get(key: K): V?
-    
+
     /**
      * Put value in cache
      * @param key The cache key
      * @param value The value to cache
      */
     suspend fun put(key: K, value: V)
-    
+
     /**
      * Get value from cache or compute if not present
      * @param key The cache key
@@ -29,28 +29,28 @@ interface CacheProvider<K : Any, V : Any> {
      * @return The cached or computed value
      */
     suspend fun getOrLoad(key: K, loader: suspend (K) -> V?): V?
-    
+
     /**
      * Invalidate cache entry
      * @param key The cache key to invalidate
      */
     suspend fun invalidate(key: K)
-    
+
     /**
      * Clear all cache entries
      */
     suspend fun invalidateAll()
-    
+
     /**
      * Get cache statistics
      */
     suspend fun getStats(): CacheStats
-    
+
     /**
      * Get current cache size
      */
     suspend fun size(): Long
-    
+
     /**
      * Check if the cache is healthy
      */

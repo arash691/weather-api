@@ -17,24 +17,24 @@ fun main(args: Array<String>) {
 fun Application.module() {
     // Load configuration
     val weatherConfig = AppConfig.load(this)
-    
+
     // Initialize dependency injection
     val dependencyInjection = DependencyInjection(weatherConfig)
-    
+
     // Create weather controller with application service
     val weatherController = WeatherController(
         weatherService = dependencyInjection.weatherService()
     )
-    
+
     // Configure Ktor plugins
     configureHTTP()
     configureSerialization()
     configureMonitoring()
     configureStatusPages()
-    
+
     // Configure routing
     configureRouting(weatherController)
-    
+
     // Register shutdown hook for cleanup  
     monitor.subscribe(ApplicationStopping) {
         dependencyInjection.cleanup()

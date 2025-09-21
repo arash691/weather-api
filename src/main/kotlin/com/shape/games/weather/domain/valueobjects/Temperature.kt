@@ -1,7 +1,5 @@
 package com.shape.games.weather.domain.valueobjects
 
-import com.shape.games.weather.domain.exceptions.TemperatureValidationException
-
 /**
  * Value object representing a temperature value with unit
  * Encapsulates temperature conversion and validation logic
@@ -11,11 +9,11 @@ data class Temperature private constructor(
     val unit: TemperatureUnit
 ) {
     init {
-        require(value >= ABSOLUTE_ZERO_CELSIUS) { 
-            "Temperature cannot be below absolute zero (-273.15°C), got: $value°${unit.symbol}" 
+        require(value >= ABSOLUTE_ZERO_CELSIUS) {
+            "Temperature cannot be below absolute zero (-273.15°C), got: $value°${unit.symbol}"
         }
-        require(value <= MAX_REASONABLE_TEMP) { 
-            "Temperature seems unreasonably high (>${MAX_REASONABLE_TEMP}°C), got: $value°${unit.symbol}" 
+        require(value <= MAX_REASONABLE_TEMP) {
+            "Temperature seems unreasonably high (>${MAX_REASONABLE_TEMP}°C), got: $value°${unit.symbol}"
         }
     }
 
@@ -76,7 +74,7 @@ data class Temperature private constructor(
             return try {
                 val value = temperatureString.trim().toDoubleOrNull()
                     ?: return Result.failure(IllegalArgumentException("Invalid temperature value: '$temperatureString'"))
-                
+
                 Result.success(Temperature(value, unit))
             } catch (e: Exception) {
                 Result.failure(IllegalArgumentException("Invalid temperature: '$temperatureString'", e))

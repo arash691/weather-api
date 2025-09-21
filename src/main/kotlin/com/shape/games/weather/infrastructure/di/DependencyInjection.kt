@@ -1,8 +1,6 @@
 package com.shape.games.weather.infrastructure.di
 
 import com.shape.games.weather.application.WeatherService
-import com.shape.games.weather.domain.repositories.WeatherRepository
-import com.shape.games.weather.infrastructure.repositories.WeatherRepositoryImpl
 import com.shape.games.weather.domain.cache.CacheConfig
 import com.shape.games.weather.domain.cache.CacheProvider
 import com.shape.games.weather.domain.cache.CacheProviderType
@@ -12,14 +10,16 @@ import com.shape.games.weather.domain.entities.WeatherForecast
 import com.shape.games.weather.domain.providers.WeatherProvider
 import com.shape.games.weather.domain.providers.WeatherProviderConfig
 import com.shape.games.weather.domain.providers.WeatherProviderType
+import com.shape.games.weather.domain.ratelimit.RateLimitAlgorithm
 import com.shape.games.weather.domain.ratelimit.RateLimitConfig
 import com.shape.games.weather.domain.ratelimit.RateLimitProvider
-import com.shape.games.weather.domain.ratelimit.RateLimitAlgorithm
+import com.shape.games.weather.domain.repositories.WeatherRepository
+import com.shape.games.weather.infrastructure.config.WeatherConfig
+import com.shape.games.weather.infrastructure.config.windowSizeDuration
 import com.shape.games.weather.infrastructure.factories.CacheProviderFactory
 import com.shape.games.weather.infrastructure.factories.RateLimitProviderFactory
 import com.shape.games.weather.infrastructure.factories.WeatherProviderFactory
-import com.shape.games.weather.infrastructure.config.WeatherConfig
-import com.shape.games.weather.infrastructure.config.windowSizeDuration
+import com.shape.games.weather.infrastructure.repositories.WeatherRepositoryImpl
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -35,14 +35,14 @@ import kotlin.time.Duration.Companion.minutes
  * Supports switching between different providers via configuration
  */
 class DependencyInjection(private val config: WeatherConfig) {
-    
+
     private val logger = LoggerFactory.getLogger(DependencyInjection::class.java)
-    
+
 
     private val weatherProviderFactory = WeatherProviderFactory()
     private val cacheProviderFactory = CacheProviderFactory()
     private val rateLimitProviderFactory = RateLimitProviderFactory()
-    
+
 
     private val httpClient: HttpClient by lazy {
         logger.info("Initializing HTTP client")
@@ -54,20 +54,20 @@ class DependencyInjection(private val config: WeatherConfig) {
                     prettyPrint = true
                 })
             }
-            
+
             install(HttpTimeout) {
                 requestTimeoutMillis = config.openWeatherMap.timeoutMs
                 connectTimeoutMillis = config.openWeatherMap.timeoutMs
                 socketTimeoutMillis = config.openWeatherMap.timeoutMs
             }
-            
+
             if (logger.isDebugEnabled) {
                 install(Logging) {
                     logger = Logger.DEFAULT
                     level = LogLevel.INFO
                 }
             }
-            
+
             defaultRequest {
                 headers.append("User-Agent", "WeatherIntegrationAPI/1.0")
             }
@@ -84,7 +84,7 @@ class DependencyInjection(private val config: WeatherConfig) {
         )
         weatherProviderFactory.createProvider(providerConfig, httpClient)
     }
-    
+
 
     private val rateLimitProvider: RateLimitProvider by lazy {
         logger.info("Initializing rate limit provider: {}", config.rateLimit.algorithm)
@@ -96,7 +96,7 @@ class DependencyInjection(private val config: WeatherConfig) {
         )
         rateLimitProviderFactory.createProvider(rateLimitConfig)
     }
-    
+
 
     private val weatherCache: CacheProvider<String, WeatherData> by lazy {
         logger.info("Initializing weather cache provider: {}", config.cache.weather.provider)
@@ -108,7 +108,7 @@ class DependencyInjection(private val config: WeatherConfig) {
         )
         cacheProviderFactory.createProvider(cacheConfig)
     }
-    
+
     private val forecastCache: CacheProvider<String, WeatherForecast> by lazy {
         logger.info("Initializing forecast cache provider: {}", config.cache.forecast.provider)
         val cacheConfig = CacheConfig(
@@ -119,7 +119,7 @@ class DependencyInjection(private val config: WeatherConfig) {
         )
         cacheProviderFactory.createProvider(cacheConfig)
     }
-    
+
     private val locationCache: CacheProvider<String, Location> by lazy {
         logger.info("Initializing location cache provider: {}", config.cache.location.provider)
         val cacheConfig = CacheConfig(
@@ -130,7 +130,7 @@ class DependencyInjection(private val config: WeatherConfig) {
         )
         cacheProviderFactory.createProvider(cacheConfig)
     }
-    
+
     // Weather Repository (singleton)
     private val weatherRepository: WeatherRepository by lazy {
         logger.info("Initializing weather repository")
@@ -141,7 +141,7 @@ class DependencyInjection(private val config: WeatherConfig) {
             locationCache = locationCache
         )
     }
-    
+
     // Weather Service (singleton) - DDD approach
     private val weatherService: WeatherService by lazy {
         logger.info("Initializing weather application service")
@@ -159,7 +159,7 @@ class DependencyInjection(private val config: WeatherConfig) {
     fun weatherCache(): CacheProvider<String, WeatherData> = weatherCache
     fun forecastCache(): CacheProvider<String, WeatherForecast> = forecastCache
     fun locationCache(): CacheProvider<String, Location> = locationCache
-    
+
 
     fun cleanup() {
         logger.info("Cleaning up dependencies")

@@ -12,7 +12,7 @@ data class WeatherSummaryRequest(
         require(locationIds.isNotEmpty()) { "At least one location must be provided" }
         require(locationIds.size <= 50) { "Maximum 50 locations allowed per request" }
     }
-    
+
     companion object {
         fun fromQueryParams(
             locationsParam: String,
@@ -21,28 +21,28 @@ data class WeatherSummaryRequest(
         ): WeatherSummaryRequest {
             // Parse and validate locations
             val locationIds = parseLocationIds(locationsParam)
-            
+
             // Parse and validate temperature
             val temperature = temperatureParam.toDoubleOrNull()
                 ?: throw IllegalArgumentException("Invalid temperature: $temperatureParam")
             val temperatureThreshold = TemperatureThreshold(temperature)
-            
+
             // Parse and validate unit
             val unit = parseTemperatureUnit(unitParam ?: "celsius")
-            
+
             return WeatherSummaryRequest(locationIds, temperatureThreshold, unit)
         }
-        
+
         private fun parseLocationIds(locationsParam: String): List<LocationId> {
             val coordinates = locationsParam.split(",").map { it.trim() }.filter { it.isNotEmpty() }
             require(coordinates.size >= 2) { "At least one location coordinate pair required" }
             require(coordinates.size % 2 == 0) { "Location coordinates must be in pairs (lat,lon)" }
-            
+
             return coordinates.chunked(2).map { (lat, lon) ->
                 LocationId.fromCoordinateString("$lat,$lon")
             }
         }
-        
+
         private fun parseTemperatureUnit(unit: String): TemperatureUnit {
             return when (unit.lowercase()) {
                 "celsius", "c" -> TemperatureUnit.CELSIUS
@@ -59,11 +59,11 @@ data class WeatherSummaryRequest(
 data class LocationId(val value: String) {
     init {
         require(value.isNotBlank()) { "Location ID cannot be blank" }
-        require(Location.isValidCoordinateString(value)) { 
-            "Invalid location ID format: $value. Expected 'lat,lon'" 
+        require(Location.isValidCoordinateString(value)) {
+            "Invalid location ID format: $value. Expected 'lat,lon'"
         }
     }
-    
+
     companion object {
         fun fromCoordinateString(coordinateString: String): LocationId {
             return LocationId(coordinateString)

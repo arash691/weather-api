@@ -3,8 +3,8 @@ package com.shape.games.com.shape.games.weather.infrastructure.config
 import com.shape.games.weather.domain.exceptions.NotFoundException
 import com.shape.games.weather.domain.exceptions.RateLimitExceededException
 import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
-import com.shape.games.weather.presentation.dto.ErrorResponse
 import com.shape.games.weather.presentation.dto.ErrorDetails
+import com.shape.games.weather.presentation.dto.ErrorResponse
 import com.shape.games.weather.presentation.dto.ResponseMetadata
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -17,8 +17,8 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
-import org.slf4j.event.Level
 import org.slf4j.LoggerFactory
+import org.slf4j.event.Level
 import java.time.Instant
 
 /**
@@ -35,7 +35,7 @@ fun Application.configureHTTP() {
         allowHeader(HttpHeaders.Accept)
         anyHost() // For development - restrict in production
     }
-    
+
     install(DefaultHeaders) {
         header("X-Engine", "Ktor") // will send this header with each response
     }
@@ -76,7 +76,7 @@ fun Application.configureMonitoring() {
  */
 fun Application.configureStatusPages() {
     val logger = LoggerFactory.getLogger("GlobalExceptionHandler")
-    
+
     install(StatusPages) {
         // Handle specific exception types
         exception<IllegalArgumentException> { call, cause ->
@@ -87,7 +87,7 @@ fun Application.configureStatusPages() {
                 cause.message ?: "Invalid request parameter"
             )
         }
-        
+
         exception<NotFoundException> { call, cause ->
             logger.warn("Resource not found in ${call.request.uri}: ${cause.message}")
             call.respondError(
@@ -96,7 +96,7 @@ fun Application.configureStatusPages() {
                 cause.message ?: "Resource not found"
             )
         }
-        
+
         exception<RateLimitExceededException> { call, cause ->
             logger.warn("Rate limit exceeded in ${call.request.uri}: ${cause.message}")
             call.respondError(
@@ -105,7 +105,7 @@ fun Application.configureStatusPages() {
                 cause.message ?: "Rate limit exceeded"
             )
         }
-        
+
         exception<ServiceUnavailableException> { call, cause ->
             logger.error("Service unavailable in ${call.request.uri}: ${cause.message}")
             call.respondError(
@@ -114,7 +114,7 @@ fun Application.configureStatusPages() {
                 cause.message ?: "Service temporarily unavailable"
             )
         }
-        
+
         // Handle all other exceptions
         exception<Throwable> { call, cause ->
             logger.error("Unhandled exception in ${call.request.uri}", cause)
@@ -124,7 +124,7 @@ fun Application.configureStatusPages() {
                 "An unexpected error occurred"
             )
         }
-        
+
         // Handle specific HTTP status codes
         status(HttpStatusCode.NotFound) { call, _ ->
             call.respondError(
@@ -133,7 +133,7 @@ fun Application.configureStatusPages() {
                 "The requested endpoint was not found"
             )
         }
-        
+
         status(HttpStatusCode.MethodNotAllowed) { call, _ ->
             call.respondError(
                 HttpStatusCode.MethodNotAllowed,
@@ -141,7 +141,7 @@ fun Application.configureStatusPages() {
                 "HTTP method not allowed for this endpoint"
             )
         }
-        
+
         status(HttpStatusCode.UnsupportedMediaType) { call, _ ->
             call.respondError(
                 HttpStatusCode.UnsupportedMediaType,

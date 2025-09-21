@@ -24,12 +24,12 @@ class WeatherRequestValidationService {
         temperatureParam: String?,
         unitParam: String?
     ): Result<WeatherSummaryRequestData> {
-        
+
         // Validate required parameters
         if (locationsParam.isNullOrBlank()) {
             return Result.failure(IllegalArgumentException("Locations parameter is required"))
         }
-        
+
         if (temperatureParam.isNullOrBlank()) {
             return Result.failure(IllegalArgumentException("Temperature parameter is required"))
         }
@@ -39,14 +39,16 @@ class WeatherRequestValidationService {
         if (coordinatesResult.isFailure) {
             return Result.failure(coordinatesResult.exceptionOrNull()!!)
         }
-        
+
         val coordinates = coordinatesResult.getOrThrow()
-        
+
         // Validate number of locations
         if (coordinates.size > MAX_LOCATIONS_PER_REQUEST) {
-            return Result.failure(IllegalArgumentException(
-                "Too many locations requested. Maximum allowed: $MAX_LOCATIONS_PER_REQUEST, got: ${coordinates.size}"
-            ))
+            return Result.failure(
+                IllegalArgumentException(
+                    "Too many locations requested. Maximum allowed: $MAX_LOCATIONS_PER_REQUEST, got: ${coordinates.size}"
+                )
+            )
         }
 
         // Parse and validate temperature unit
@@ -54,7 +56,7 @@ class WeatherRequestValidationService {
         if (unitResult.isFailure) {
             return Result.failure(unitResult.exceptionOrNull()!!)
         }
-        
+
         val unit = unitResult.getOrThrow()
 
         // Parse and validate temperature threshold
@@ -62,15 +64,17 @@ class WeatherRequestValidationService {
         if (temperatureResult.isFailure) {
             return Result.failure(temperatureResult.exceptionOrNull()!!)
         }
-        
+
         val temperature = temperatureResult.getOrThrow()
 
         // Validate temperature threshold range
         val tempInCelsius = temperature.toCelsius()
         if (tempInCelsius < MIN_TEMPERATURE_THRESHOLD || tempInCelsius > MAX_TEMPERATURE_THRESHOLD) {
-            return Result.failure(IllegalArgumentException(
-                "Temperature threshold out of reasonable range ($MIN_TEMPERATURE_THRESHOLD to $MAX_TEMPERATURE_THRESHOLD°C), got: ${temperature.format()}"
-            ))
+            return Result.failure(
+                IllegalArgumentException(
+                    "Temperature threshold out of reasonable range ($MIN_TEMPERATURE_THRESHOLD to $MAX_TEMPERATURE_THRESHOLD°C), got: ${temperature.format()}"
+                )
+            )
         }
 
         return Result.success(WeatherSummaryRequestData(coordinates, temperature))

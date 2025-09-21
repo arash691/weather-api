@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.shape.games</groupId>
@@ -36,7 +36,7 @@
             <artifactId>ktor-server-config-yaml-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
-        
+
         <!-- Content Negotiation & Serialization -->
         <dependency>
             <groupId>io.ktor</groupId>
@@ -48,7 +48,7 @@
             <artifactId>ktor-serialization-kotlinx-json-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
-        
+
         <!-- HTTP Client for 3rd party API calls -->
         <dependency>
             <groupId>io.ktor</groupId>
@@ -70,63 +70,63 @@
             <artifactId>ktor-client-logging-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
-        
+
         <!-- Status Pages for error handling -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-status-pages-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
-        
+
         <!-- Call Logging -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-call-logging-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
-        
+
         <!-- CORS -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-cors-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
-        
+
         <!-- Default Headers -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-default-headers-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
-        
+
         <!-- Caching -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>3.1.8</version>
         </dependency>
-        
+
         <!-- DateTime -->
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-datetime</artifactId>
             <version>0.6.1</version>
         </dependency>
-        
+
         <!-- Serialization -->
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-serialization-json</artifactId>
             <version>1.6.3</version>
         </dependency>
-        
+
         <!-- Validation -->
         <dependency>
             <groupId>io.konform</groupId>
             <artifactId>konform-jvm</artifactId>
             <version>0.6.1</version>
         </dependency>
-        
+
         <!-- Logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -138,7 +138,7 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j_version}</version>
         </dependency>
-        
+
         <!-- Testing -->
         <dependency>
             <groupId>io.ktor</groupId>

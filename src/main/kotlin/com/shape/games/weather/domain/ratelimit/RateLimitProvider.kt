@@ -7,34 +7,34 @@ import kotlin.time.Duration
  * Allows switching between different rate limiting algorithms
  */
 interface RateLimitProvider {
-    
+
     /**
      * Check if a request can be made without exceeding the rate limit
      * @return true if request can be made, false otherwise
      */
     suspend fun canMakeRequest(): Boolean
-    
+
     /**
      * Consume a token/request from the rate limiter
      * @return true if token was consumed, false if rate limit exceeded
      */
     suspend fun consumeToken(): Boolean
-    
+
     /**
      * Get the remaining number of requests allowed
      */
     suspend fun getRemainingRequests(): Int
-    
+
     /**
      * Get the time until the rate limit resets
      */
     suspend fun getTimeUntilReset(): Duration
-    
+
     /**
      * Get current rate limit statistics
      */
     suspend fun getStats(): RateLimitStats
-    
+
     /**
      * Check if the rate limiter is healthy
      */

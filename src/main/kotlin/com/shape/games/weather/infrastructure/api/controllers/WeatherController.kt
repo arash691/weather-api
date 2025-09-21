@@ -15,9 +15,9 @@ import java.time.Instant
 class WeatherController(
     private val weatherService: WeatherService
 ) {
-    
+
     private val logger = LoggerFactory.getLogger(WeatherController::class.java)
-    
+
     /**
      * Handle GET /api/v1/weather/summary endpoint
      * Pure HTTP concern - extract parameters and delegate to application service
@@ -27,21 +27,21 @@ class WeatherController(
         val locationsParam = call.request.queryParameters["locations"]
         val temperatureParam = call.request.queryParameters["temperature"]
         val unitParam = call.request.queryParameters["unit"]
-        
+
         // Delegate to application service (domain validation happens there)
         val summaries = weatherService.getWeatherSummaryForFavorites(
             locationsParam, temperatureParam, unitParam
         )
-        
+
         // Format response (infrastructure concern)
         val response = WeatherSummaryResponse(
             locations = summaries,
             metadata = createResponseMetadata()
         )
-        
+
         call.respond(HttpStatusCode.OK, response)
     }
-    
+
     /**
      * Handle GET /api/v1/weather/locations/{locationId} endpoint
      * Pure HTTP concern - extract parameters and delegate to application service
@@ -49,11 +49,11 @@ class WeatherController(
     suspend fun getLocationWeather(call: ApplicationCall) {
         // Extract HTTP parameter (infrastructure concern)
         val locationParam = call.parameters["locationId"]
-        
+
         // Delegate to application service (domain validation happens there)
         val weatherDetails = weatherService.getLocationWeatherDetails(locationParam)
             ?: throw NotFoundException("Location not found")
-        
+
         // Format response (infrastructure concern)
         val response = LocationWeatherResponse(
             location = LocationDto(
@@ -77,15 +77,15 @@ class WeatherController(
             },
             metadata = createResponseMetadata()
         )
-        
+
         call.respond(HttpStatusCode.OK, response)
     }
-    
+
     private suspend fun createResponseMetadata(): ResponseMetadata {
         return ResponseMetadata(
             timestamp = Instant.now().toString(),
             rateLimitRemaining = weatherService.getRemainingRequests()
         )
     }
-    
+
 }
