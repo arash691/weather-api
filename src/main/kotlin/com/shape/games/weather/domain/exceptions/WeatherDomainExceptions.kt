@@ -1,0 +1,48 @@
+package com.shape.games.weather.domain.exceptions
+
+/**
+ * Domain exceptions for weather-related business rules
+ * These represent business rule violations and domain-specific errors
+ */
+
+/**
+ * Exception thrown when a requested resource is not found
+ * This is a domain concept - the business rule that a resource must exist
+ */
+class NotFoundException(message: String, cause: Throwable? = null) : DomainException(message, cause)
+
+/**
+ * Exception thrown when rate limit is exceeded
+ * This represents a business rule about API usage limits
+ */
+class RateLimitExceededException(message: String, cause: Throwable? = null) : DomainException(message, cause)
+
+/**
+ * Exception thrown when an external service is unavailable
+ * This represents a business rule about service availability requirements
+ */
+class ServiceUnavailableException(message: String, cause: Throwable? = null) : DomainException(message, cause)
+
+/**
+ * Exception thrown when weather data validation fails
+ * This represents business rules about valid weather data
+ */
+class WeatherDataValidationException(message: String, cause: Throwable? = null) : DomainException(message, cause)
+
+/**
+ * Exception thrown when location validation fails
+ * This represents business rules about valid geographic locations
+ */
+class LocationValidationException(message: String, cause: Throwable? = null) : DomainException(message, cause)
+
+/**
+ * Exception thrown when temperature validation fails
+ * This represents business rules about valid temperature values
+ */
+class TemperatureValidationException(message: String, cause: Throwable? = null) : DomainException(message, cause)
+
+/**
+ * Base class for all domain exceptions
+ * Represents violations of business rules and domain invariants
+ */
+abstract class DomainException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)

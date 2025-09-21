@@ -77,7 +77,6 @@ class TokenBucketRateLimitProvider(
     
     override suspend fun getStats(): RateLimitStats = mutex.withLock {
         refillTokens()
-        val now = System.currentTimeMillis()
         val resetTime = lastRefill.get() + windowSize.inWholeMilliseconds
         
         RateLimitStats(
@@ -111,14 +110,4 @@ class TokenBucketRateLimitProvider(
             }
         }
     }
-    
-    /**
-     * Get current refill rate (tokens per second)
-     */
-    fun getRefillRatePerSecond(): Double = refillRate * 1000
-    
-    /**
-     * Get burst capacity (maximum tokens that can be consumed at once)
-     */
-    fun getBurstCapacity(): Int = (maxRequests * burstAllowance).toInt()
 }

@@ -34,33 +34,3 @@ cache:
     provider: "CAFFEINE"
     durationMinutes: 1440  # 24 hours
   maxCacheSize: 1000
-
-# Example configurations for different environments
-
-# Development with Redis cache
-# cache:
-#   weather:
-#     provider: "REDIS"
-#     durationMinutes: 15
-#   forecast:
-#     provider: "REDIS"
-#     durationMinutes: 60
-#   location:
-#     provider: "CAFFEINE"  # Keep location cache local
-#     durationMinutes: 1440
-
-# Production with multiple providers
-# weather:
-#   provider:
-#     type: "OPENWEATHERMAP"
-#     fallbackEnabled: true
-#     fallbackProvider: "ACCUWEATHER"
-
-# High-traffic with Hazelcast
-# cache:
-#   weather:
-#     provider: "HAZELCAST"
-#     durationMinutes: 10
-#   forecast:
-#     provider: "HAZELCAST"
-#     durationMinutes: 30
