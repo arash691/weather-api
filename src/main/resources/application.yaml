@@ -16,13 +16,6 @@ openweathermap:
   baseUrl: "https://api.openweathermap.org"
   timeoutMs: 30000
 
-rateLimit:
-  algorithm: "TOKEN_BUCKET"  # TOKEN_BUCKET, SLIDING_WINDOW, FIXED_WINDOW, LEAKY_BUCKET
-  maxRequestsPerDay: 10000
-  windowSizeDays: 1
-  burstAllowance: 0.2  # 20% burst allowance
-  refillRate: null  # requests per second (auto-calculated if null)
-
 cache:
   weather:
     provider: "CAFFEINE"  # CAFFEINE, REDIS, HAZELCAST, EHCACHE, MEMORY

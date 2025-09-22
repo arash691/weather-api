@@ -25,7 +25,6 @@ class WeatherRequestValidationService {
         unitParam: String?
     ): Result<WeatherSummaryRequestData> {
 
-        // Validate required parameters
         if (locationsParam.isNullOrBlank()) {
             return Result.failure(IllegalArgumentException("Locations parameter is required"))
         }
@@ -34,7 +33,7 @@ class WeatherRequestValidationService {
             return Result.failure(IllegalArgumentException("Temperature parameter is required"))
         }
 
-        // Parse and validate coordinates
+
         val coordinatesResult = Coordinates.fromMultipleString(locationsParam)
         if (coordinatesResult.isFailure) {
             return Result.failure(coordinatesResult.exceptionOrNull()!!)
@@ -42,7 +41,6 @@ class WeatherRequestValidationService {
 
         val coordinates = coordinatesResult.getOrThrow()
 
-        // Validate number of locations
         if (coordinates.size > MAX_LOCATIONS_PER_REQUEST) {
             return Result.failure(
                 IllegalArgumentException(
@@ -51,7 +49,6 @@ class WeatherRequestValidationService {
             )
         }
 
-        // Parse and validate temperature unit
         val unitResult = TemperatureUnit.fromString(unitParam)
         if (unitResult.isFailure) {
             return Result.failure(unitResult.exceptionOrNull()!!)
@@ -59,7 +56,6 @@ class WeatherRequestValidationService {
 
         val unit = unitResult.getOrThrow()
 
-        // Parse and validate temperature threshold
         val temperatureResult = Temperature.fromString(temperatureParam, unit)
         if (temperatureResult.isFailure) {
             return Result.failure(temperatureResult.exceptionOrNull()!!)
@@ -67,7 +63,6 @@ class WeatherRequestValidationService {
 
         val temperature = temperatureResult.getOrThrow()
 
-        // Validate temperature threshold range
         val tempInCelsius = temperature.toCelsius()
         if (tempInCelsius < MIN_TEMPERATURE_THRESHOLD || tempInCelsius > MAX_TEMPERATURE_THRESHOLD) {
             return Result.failure(

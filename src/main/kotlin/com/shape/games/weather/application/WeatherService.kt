@@ -2,9 +2,7 @@ package com.shape.games.weather.application
 
 import com.shape.games.weather.domain.entities.Location
 import com.shape.games.weather.domain.entities.WeatherForecast
-import com.shape.games.weather.domain.exceptions.RateLimitExceededException
 import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
-import com.shape.games.weather.domain.ratelimit.RateLimitProvider
 import com.shape.games.weather.domain.repositories.WeatherRepository
 import com.shape.games.weather.domain.services.WeatherRequestValidationService
 import com.shape.games.weather.domain.valueobjects.Coordinates
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory
  */
 class WeatherService(
     private val weatherRepository: WeatherRepository,
-    private val rateLimitProvider: RateLimitProvider,
     private val validationService: WeatherRequestValidationService = WeatherRequestValidationService()
 ) {
 
@@ -26,7 +23,6 @@ class WeatherService(
 
     /**
      * Get weather summary for favorite locations where temperature will be above threshold
-     * Uses domain validation service for proper DDD validation
      */
     suspend fun getWeatherSummaryForFavorites(
         locationsParam: String?,
@@ -34,7 +30,6 @@ class WeatherService(
         unitParam: String?
     ): List<LocationSummaryDto> {
 
-        // Domain validation
         val validationResult = validationService.validateWeatherSummaryRequest(
             locationsParam, temperatureParam, unitParam
         )
@@ -53,11 +48,6 @@ class WeatherService(
         val summaries = mutableListOf<LocationSummaryDto>()
 
         for (coordinates in requestData.coordinates) {
-            if (!rateLimitProvider.consumeToken()) {
-                logger.warn("Rate limit exceeded for location summary request")
-                throw RateLimitExceededException("Rate limit exceeded. Please try again later.")
-            }
-
             try {
                 val summary = getLocationSummary(coordinates, requestData.temperatureThreshold)
                 if (summary != null) {
@@ -65,20 +55,14 @@ class WeatherService(
                 }
             } catch (e: Exception) {
                 logger.error("Error processing location ${coordinates.toCoordinateString()}", e)
-                // Continue with other locations
             }
         }
 
         return summaries
     }
 
-    /**
-     * Get detailed weather forecast for a specific location
-     * Uses domain validation service for proper DDD validation
-     */
     suspend fun getLocationWeatherDetails(locationParam: String?): LocationWeatherDetails? {
 
-        // Domain validation
         val validationResult = validationService.validateLocationWeatherRequest(locationParam)
 
         if (validationResult.isFailure) {
@@ -88,11 +72,6 @@ class WeatherService(
         val coordinates = validationResult.getOrThrow()
 
         logger.info("Getting weather details for location: {}", coordinates.toCoordinateString())
-
-        if (!rateLimitProvider.consumeToken()) {
-            logger.warn("Rate limit exceeded for location weather request")
-            throw RateLimitExceededException("Rate limit exceeded. Please try again later.")
-        }
 
         return try {
             val location = getLocationByCoordinates(coordinates) ?: return null
@@ -105,13 +84,6 @@ class WeatherService(
         }
     }
 
-    /**
-     * Get remaining rate limit requests
-     */
-    suspend fun getRemainingRequests(): Int {
-        return rateLimitProvider.getRemainingRequests()
-    }
-
     private suspend fun getLocationSummary(
         coordinates: Coordinates,
         temperatureThreshold: Temperature
@@ -119,14 +91,12 @@ class WeatherService(
         val location = getLocationByCoordinates(coordinates) ?: return null
         val forecast = getForecastForLocation(location) ?: return null
 
-        // Get tomorrow's forecast (use first forecast as tomorrow)
         val tomorrow = forecast.forecasts.getOrNull(1)?.date
             ?: forecast.forecasts.firstOrNull()?.date
 
         val tomorrowForecast = forecast.forecasts.find { it.date == tomorrow }
             ?: return null
 
-        // Convert domain temperature to check threshold
         val maxTempDomain = Temperature.celsius(
             tomorrowForecast.temperatureMax.celsius
         )

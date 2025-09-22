@@ -14,6 +14,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
@@ -84,7 +85,8 @@ fun Application.configureStatusPages() {
             call.respondError(
                 HttpStatusCode.BadRequest,
                 "VALIDATION_ERROR",
-                cause.message ?: "Invalid request parameter"
+                cause.message ?: "Invalid request parameter",
+                details = "Please check your request parameters and ensure they meet the required format."
             )
         }
 
@@ -103,6 +105,22 @@ fun Application.configureStatusPages() {
                 HttpStatusCode.TooManyRequests,
                 "RATE_LIMIT_EXCEEDED",
                 cause.message ?: "Rate limit exceeded"
+            )
+        }
+
+        // Handle Ktor's built-in rate limit exceptions with better UX
+        status(HttpStatusCode.TooManyRequests) { call, status ->
+            val retryAfter = call.response.headers["Retry-After"] ?: "3600"
+            val rateLimitType = when {
+                call.request.uri.contains("/weather") -> "weather API"
+                else -> "API"
+            }
+            
+            call.respondError(
+                HttpStatusCode.TooManyRequests,
+                "RATE_LIMIT_EXCEEDED",
+                "Rate limit exceeded for $rateLimitType. Please try again in $retryAfter seconds.",
+                details = "You have exceeded the allowed number of requests. Please implement client-side caching and space out your requests."
             )
         }
 
@@ -161,6 +179,16 @@ suspend fun ApplicationCall.respondError(
     message: String,
     details: String? = null
 ) {
+    // Add error tracking headers
+    val requestId = "err_${java.util.UUID.randomUUID().toString().take(8)}"
+    response.headers.append("X-Request-ID", requestId)
+    response.headers.append("X-Error-Code", errorCode)
+    
+    // Add CORS headers for better client handling
+    response.headers.append("Access-Control-Allow-Origin", "*")
+    response.headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+    response.headers.append("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
     val errorResponse = ErrorResponse(
         error = ErrorDetails(
             code = errorCode,
@@ -168,10 +196,12 @@ suspend fun ApplicationCall.respondError(
             details = details
         ),
         metadata = ResponseMetadata(
-            timestamp = Instant.now().toString(),
-            source = "weather-integration-api"
+            timestamp = Instant.now().atOffset(java.time.ZoneOffset.UTC)
+                .format(java.time.format.DateTimeFormatter.ISO_INSTANT),
+            requestId = requestId
         )
     )
     respond(status, errorResponse)
 }
+
 

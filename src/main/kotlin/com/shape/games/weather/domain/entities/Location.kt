@@ -34,10 +34,10 @@ data class Location(
 
             return Location(
                 id = coordinateString,
-                name = "Unknown", // Will be populated from API
+                name = "Unknown",
                 latitude = lat,
                 longitude = lon,
-                country = "Unknown" // Will be populated from API
+                country = "Unknown"
             )
         }
 

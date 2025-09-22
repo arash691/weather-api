@@ -41,7 +41,7 @@ data class LocationDto(
 
 @Serializable
 data class DailyForecastDto(
-    val date: String, // ISO date format (YYYY-MM-DD)
+    val date: String,
     val temperatureMin: Double,
     val temperatureMax: Double,
     val temperatureUnit: String,
@@ -53,10 +53,8 @@ data class DailyForecastDto(
 
 @Serializable
 data class ResponseMetadata(
-    val timestamp: String, // ISO datetime format
-    val source: String = "weather-integration-api",
-    val cacheStatus: String? = null,
-    val rateLimitRemaining: Int? = null
+    val timestamp: String,
+    val requestId: String? = null // Keep for debugging support
 )
 
 @Serializable
@@ -69,5 +67,5 @@ data class ErrorResponse(
 data class ErrorDetails(
     val code: String,
     val message: String,
-    val details: String? = null
+    val details: String? = null // Keep some context, but simpler
 )

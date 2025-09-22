@@ -10,14 +10,9 @@ import com.shape.games.weather.domain.entities.WeatherForecast
 import com.shape.games.weather.domain.providers.WeatherProvider
 import com.shape.games.weather.domain.providers.WeatherProviderConfig
 import com.shape.games.weather.domain.providers.WeatherProviderType
-import com.shape.games.weather.domain.ratelimit.RateLimitAlgorithm
-import com.shape.games.weather.domain.ratelimit.RateLimitConfig
-import com.shape.games.weather.domain.ratelimit.RateLimitProvider
 import com.shape.games.weather.domain.repositories.WeatherRepository
 import com.shape.games.weather.infrastructure.config.WeatherConfig
-import com.shape.games.weather.infrastructure.config.windowSizeDuration
 import com.shape.games.weather.infrastructure.factories.CacheProviderFactory
-import com.shape.games.weather.infrastructure.factories.RateLimitProviderFactory
 import com.shape.games.weather.infrastructure.factories.WeatherProviderFactory
 import com.shape.games.weather.infrastructure.repositories.WeatherRepositoryImpl
 import io.ktor.client.*
@@ -41,7 +36,6 @@ class DependencyInjection(private val config: WeatherConfig) {
 
     private val weatherProviderFactory = WeatherProviderFactory()
     private val cacheProviderFactory = CacheProviderFactory()
-    private val rateLimitProviderFactory = RateLimitProviderFactory()
 
 
     private val httpClient: HttpClient by lazy {
@@ -85,19 +79,6 @@ class DependencyInjection(private val config: WeatherConfig) {
         weatherProviderFactory.createProvider(providerConfig, httpClient)
     }
 
-
-    private val rateLimitProvider: RateLimitProvider by lazy {
-        logger.info("Initializing rate limit provider: {}", config.rateLimit.algorithm)
-        val rateLimitConfig = RateLimitConfig(
-            maxRequests = config.rateLimit.maxRequestsPerDay,
-            windowSize = config.rateLimit.windowSizeDuration,
-            algorithm = RateLimitAlgorithm.valueOf(config.rateLimit.algorithm.uppercase()),
-            burstAllowance = config.rateLimit.burstAllowance
-        )
-        rateLimitProviderFactory.createProvider(rateLimitConfig)
-    }
-
-
     private val weatherCache: CacheProvider<String, WeatherData> by lazy {
         logger.info("Initializing weather cache provider: {}", config.cache.weather.provider)
         val cacheConfig = CacheConfig(
@@ -131,7 +112,7 @@ class DependencyInjection(private val config: WeatherConfig) {
         cacheProviderFactory.createProvider(cacheConfig)
     }
 
-    // Weather Repository (singleton)
+
     private val weatherRepository: WeatherRepository by lazy {
         logger.info("Initializing weather repository")
         WeatherRepositoryImpl(
@@ -142,20 +123,18 @@ class DependencyInjection(private val config: WeatherConfig) {
         )
     }
 
-    // Weather Service (singleton) - DDD approach
+
     private val weatherService: WeatherService by lazy {
         logger.info("Initializing weather application service")
         WeatherService(
-            weatherRepository = weatherRepository,
-            rateLimitProvider = rateLimitProvider
+            weatherRepository = weatherRepository
         )
     }
 
-    // Public getters for dependency injection
+
     fun weatherService(): WeatherService = weatherService
     fun weatherRepository(): WeatherRepository = weatherRepository
     fun weatherProvider(): WeatherProvider = weatherProvider
-    fun rateLimitProvider(): RateLimitProvider = rateLimitProvider
     fun weatherCache(): CacheProvider<String, WeatherData> = weatherCache
     fun forecastCache(): CacheProvider<String, WeatherForecast> = forecastCache
     fun locationCache(): CacheProvider<String, Location> = locationCache

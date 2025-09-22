@@ -6,12 +6,8 @@ import com.shape.games.weather.domain.cache.CacheProviderType
 import com.shape.games.weather.domain.providers.WeatherProvider
 import com.shape.games.weather.domain.providers.WeatherProviderConfig
 import com.shape.games.weather.domain.providers.WeatherProviderType
-import com.shape.games.weather.domain.ratelimit.RateLimitAlgorithm
-import com.shape.games.weather.domain.ratelimit.RateLimitConfig
-import com.shape.games.weather.domain.ratelimit.RateLimitProvider
 import com.shape.games.weather.infrastructure.cache.CaffeineCacheProvider
 import com.shape.games.weather.infrastructure.providers.OpenWeatherMapProvider
-import com.shape.games.weather.infrastructure.ratelimit.TokenBucketRateLimitProvider
 import io.ktor.client.*
 
 /**
@@ -47,22 +43,3 @@ class CacheProviderFactory {
     }
 }
 
-/**
- * Factory for creating rate limit providers
- */
-class RateLimitProviderFactory {
-
-    fun createProvider(config: RateLimitConfig): RateLimitProvider {
-        return when (config.algorithm) {
-            RateLimitAlgorithm.TOKEN_BUCKET -> TokenBucketRateLimitProvider(
-                maxRequests = config.maxRequests,
-                windowSize = config.windowSize,
-                burstAllowance = config.burstAllowance
-            )
-
-            RateLimitAlgorithm.SLIDING_WINDOW -> throw NotImplementedError("Sliding window provider not implemented yet")
-            RateLimitAlgorithm.FIXED_WINDOW -> throw NotImplementedError("Fixed window provider not implemented yet")
-            RateLimitAlgorithm.LEAKY_BUCKET -> throw NotImplementedError("Leaky bucket provider not implemented yet")
-        }
-    }
-}

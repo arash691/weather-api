@@ -8,6 +8,9 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 /**
  * Controller handling weather-related HTTP endpoints
@@ -18,43 +21,39 @@ class WeatherController(
 
     private val logger = LoggerFactory.getLogger(WeatherController::class.java)
 
-    /**
-     * Handle GET /api/v1/weather/summary endpoint
-     * Pure HTTP concern - extract parameters and delegate to application service
-     */
     suspend fun getWeatherSummary(call: ApplicationCall) {
-        // Extract HTTP parameters (infrastructure concern)
+        val requestId = generateRequestId()
+
+        // Add essential headers only
+        call.response.headers.append("X-Request-ID", requestId)
+        
         val locationsParam = call.request.queryParameters["locations"]
         val temperatureParam = call.request.queryParameters["temperature"]
         val unitParam = call.request.queryParameters["unit"]
 
-        // Delegate to application service (domain validation happens there)
         val summaries = weatherService.getWeatherSummaryForFavorites(
             locationsParam, temperatureParam, unitParam
         )
 
-        // Format response (infrastructure concern)
         val response = WeatherSummaryResponse(
             locations = summaries,
-            metadata = createResponseMetadata()
+            metadata = createResponseMetadata(requestId)
         )
 
         call.respond(HttpStatusCode.OK, response)
     }
 
-    /**
-     * Handle GET /api/v1/weather/locations/{locationId} endpoint
-     * Pure HTTP concern - extract parameters and delegate to application service
-     */
     suspend fun getLocationWeather(call: ApplicationCall) {
-        // Extract HTTP parameter (infrastructure concern)
+        val requestId = generateRequestId()
+
+        // Add essential headers only
+        call.response.headers.append("X-Request-ID", requestId)
+
         val locationParam = call.parameters["locationId"]
 
-        // Delegate to application service (domain validation happens there)
         val weatherDetails = weatherService.getLocationWeatherDetails(locationParam)
             ?: throw NotFoundException("Location not found")
 
-        // Format response (infrastructure concern)
         val response = LocationWeatherResponse(
             location = LocationDto(
                 id = weatherDetails.location.id,
@@ -75,17 +74,21 @@ class WeatherController(
                     pressure = forecast.pressure
                 )
             },
-            metadata = createResponseMetadata()
+            metadata = createResponseMetadata(requestId)
         )
 
         call.respond(HttpStatusCode.OK, response)
     }
 
-    private suspend fun createResponseMetadata(): ResponseMetadata {
+    private fun createResponseMetadata(requestId: String? = null): ResponseMetadata {
         return ResponseMetadata(
-            timestamp = Instant.now().toString(),
-            rateLimitRemaining = weatherService.getRemainingRequests()
+            timestamp = Instant.now().atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT),
+            requestId = requestId
         )
+    }
+
+    private fun generateRequestId(): String {
+        return "req_${UUID.randomUUID().toString().take(8)}"
     }
 
 }

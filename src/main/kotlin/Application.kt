@@ -5,6 +5,7 @@ import com.shape.games.com.shape.games.weather.infrastructure.config.configureHT
 import com.shape.games.com.shape.games.weather.infrastructure.config.configureMonitoring
 import com.shape.games.com.shape.games.weather.infrastructure.config.configureSerialization
 import com.shape.games.com.shape.games.weather.infrastructure.config.configureStatusPages
+import com.shape.games.weather.infrastructure.config.configureRateLimit
 import com.shape.games.weather.infrastructure.api.controllers.WeatherController
 import com.shape.games.weather.infrastructure.config.AppConfig
 import com.shape.games.weather.infrastructure.di.DependencyInjection
@@ -15,27 +16,22 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    // Load configuration
+
     val weatherConfig = AppConfig.load(this)
 
-    // Initialize dependency injection
     val dependencyInjection = DependencyInjection(weatherConfig)
 
-    // Create weather controller with application service
     val weatherController = WeatherController(
         weatherService = dependencyInjection.weatherService()
     )
 
-    // Configure Ktor plugins
     configureHTTP()
     configureSerialization()
     configureMonitoring()
+    configureRateLimit()
     configureStatusPages()
-
-    // Configure routing
     configureRouting(weatherController)
 
-    // Register shutdown hook for cleanup  
     monitor.subscribe(ApplicationStopping) {
         dependencyInjection.cleanup()
     }

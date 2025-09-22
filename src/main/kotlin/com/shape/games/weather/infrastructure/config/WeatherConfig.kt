@@ -1,7 +1,6 @@
 package com.shape.games.weather.infrastructure.config
 
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -10,7 +9,6 @@ import kotlin.time.Duration.Companion.minutes
 data class WeatherConfig(
     val weatherProvider: WeatherProviderConfig,
     val openWeatherMap: OpenWeatherMapConfig,
-    val rateLimit: RateLimitConfig,
     val cache: CacheConfig
 )
 
@@ -26,13 +24,6 @@ data class OpenWeatherMapConfig(
     val timeoutMs: Long = 30000
 )
 
-data class RateLimitConfig(
-    val algorithm: String = "TOKEN_BUCKET", // TOKEN_BUCKET, SLIDING_WINDOW, FIXED_WINDOW
-    val maxRequestsPerDay: Int = 10000,
-    val windowSizeDays: Int = 1,
-    val burstAllowance: Double = 0.2, // 20% burst allowance
-    val refillRate: Double? = null // requests per second
-)
 
 data class CacheConfig(
     val weather: CacheTypeConfig,
@@ -56,5 +47,3 @@ val CacheTypeConfig.forecastCacheDurationMinutes: Duration
 val CacheTypeConfig.locationCacheDurationMinutes: Duration
     get() = durationMinutes.minutes
 
-val RateLimitConfig.windowSizeDuration: Duration
-    get() = windowSizeDays.days

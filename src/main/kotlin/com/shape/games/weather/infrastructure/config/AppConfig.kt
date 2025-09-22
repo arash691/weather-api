@@ -34,17 +34,6 @@ object AppConfig {
                 ?: 30000
         )
 
-        // Load rate limit configuration
-        val rateLimitConfig = RateLimitConfig(
-            algorithm = config.propertyOrNull("rateLimit.algorithm")?.getString() ?: "TOKEN_BUCKET",
-            maxRequestsPerDay = config.propertyOrNull("rateLimit.maxRequestsPerDay")?.getString()?.toIntOrNull()
-                ?: 10000,
-            windowSizeDays = config.propertyOrNull("rateLimit.windowSizeDays")?.getString()?.toIntOrNull()
-                ?: 1,
-            burstAllowance = config.propertyOrNull("rateLimit.burstAllowance")?.getString()?.toDoubleOrNull()
-                ?: 0.2,
-            refillRate = config.propertyOrNull("rateLimit.refillRate")?.getString()?.toDoubleOrNull()
-        )
 
         // Load cache configuration
         val cacheConfig = CacheConfig(
@@ -70,17 +59,12 @@ object AppConfig {
         val weatherConfig = WeatherConfig(
             weatherProvider = weatherProviderConfig,
             openWeatherMap = openWeatherMapConfig,
-            rateLimit = rateLimitConfig,
             cache = cacheConfig
         )
 
         logger.info("Configuration loaded successfully")
         logger.debug("Weather provider: {}", weatherProviderConfig.type)
         logger.debug("OpenWeatherMap base URL: {}", openWeatherMapConfig.baseUrl)
-        logger.debug(
-            "Rate limit algorithm: {} - {} requests per {} days",
-            rateLimitConfig.algorithm, rateLimitConfig.maxRequestsPerDay, rateLimitConfig.windowSizeDays
-        )
         logger.debug(
             "Cache providers - Weather: {}, Forecast: {}, Location: {}",
             cacheConfig.weather.provider, cacheConfig.forecast.provider, cacheConfig.location.provider
