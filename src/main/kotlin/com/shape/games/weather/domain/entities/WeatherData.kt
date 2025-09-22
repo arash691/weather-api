@@ -33,37 +33,4 @@ data class Temperature(
         require(celsius <= 1000) { "Temperature seems unreasonably high (>1000°C)" }
     }
 
-    val fahrenheit: Double
-        get() = celsius * 9.0 / 5.0 + 32.0
-
-    val kelvin: Double
-        get() = celsius + 273.15
-
-    /**
-     * Convert temperature to specified unit
-     */
-    fun inUnit(unit: TemperatureUnit): Double = when (unit) {
-        TemperatureUnit.CELSIUS -> celsius
-        TemperatureUnit.FAHRENHEIT -> fahrenheit
-    }
-
-    /**
-     * Check if temperature meets threshold
-     */
-    fun meetsThreshold(threshold: Double, unit: TemperatureUnit): Boolean {
-        return inUnit(unit) >= threshold
-    }
-
-    companion object {
-        fun fromCelsius(celsius: Double): Temperature = Temperature(celsius)
-        fun fromFahrenheit(fahrenheit: Double): Temperature =
-            Temperature((fahrenheit - 32.0) * 5.0 / 9.0)
-    }
-}
-
-/**
- * Enum for temperature units
- */
-enum class TemperatureUnit {
-    CELSIUS, FAHRENHEIT
 }

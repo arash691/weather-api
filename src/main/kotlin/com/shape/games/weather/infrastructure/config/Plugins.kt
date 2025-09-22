@@ -1,4 +1,4 @@
-package com.shape.games.com.shape.games.weather.infrastructure.config
+package com.shape.games.weather.infrastructure.config
 
 import com.shape.games.weather.domain.exceptions.NotFoundException
 import com.shape.games.weather.domain.exceptions.RateLimitExceededException
@@ -14,7 +14,6 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
@@ -108,7 +107,7 @@ fun Application.configureStatusPages() {
             )
         }
 
-        // Handle Ktor's built-in rate limit exceptions with better UX
+
         status(HttpStatusCode.TooManyRequests) { call, status ->
             val retryAfter = call.response.headers["Retry-After"] ?: "3600"
             val rateLimitType = when {
@@ -179,12 +178,11 @@ suspend fun ApplicationCall.respondError(
     message: String,
     details: String? = null
 ) {
-    // Add error tracking headers
+
     val requestId = "err_${java.util.UUID.randomUUID().toString().take(8)}"
     response.headers.append("X-Request-ID", requestId)
     response.headers.append("X-Error-Code", errorCode)
-    
-    // Add CORS headers for better client handling
+
     response.headers.append("Access-Control-Allow-Origin", "*")
     response.headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
     response.headers.append("Access-Control-Allow-Headers", "Content-Type, Authorization")

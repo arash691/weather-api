@@ -6,7 +6,6 @@ import com.shape.games.weather.presentation.dto.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
-import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -19,7 +18,6 @@ class WeatherController(
     private val weatherService: WeatherService
 ) {
 
-    private val logger = LoggerFactory.getLogger(WeatherController::class.java)
 
     suspend fun getWeatherSummary(call: ApplicationCall) {
         val requestId = generateRequestId()

@@ -23,23 +23,6 @@ class RateLimitExceededException(message: String, cause: Throwable? = null) : Do
  */
 class ServiceUnavailableException(message: String, cause: Throwable? = null) : DomainException(message, cause)
 
-/**
- * Exception thrown when weather data validation fails
- * This represents business rules about valid weather data
- */
-class WeatherDataValidationException(message: String, cause: Throwable? = null) : DomainException(message, cause)
-
-/**
- * Exception thrown when location validation fails
- * This represents business rules about valid geographic locations
- */
-class LocationValidationException(message: String, cause: Throwable? = null) : DomainException(message, cause)
-
-/**
- * Exception thrown when temperature validation fails
- * This represents business rules about valid temperature values
- */
-class TemperatureValidationException(message: String, cause: Throwable? = null) : DomainException(message, cause)
 
 /**
  * Base class for all domain exceptions

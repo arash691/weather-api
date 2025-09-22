@@ -1,4 +1,4 @@
-package com.shape.games.com.shape.games.weather.infrastructure.api
+package com.shape.games.weather.infrastructure.api
 
 import com.shape.games.weather.infrastructure.api.controllers.WeatherController
 import io.ktor.server.application.*

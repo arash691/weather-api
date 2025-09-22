@@ -4,7 +4,7 @@ import kotlin.time.Duration
 
 /**
  * Abstract interface for cache implementations
- * Allows switching between different cache providers (Caffeine, Redis, Hazelcast, etc.)
+ * Allows switching between different cache providers (Caffeine, Redis, etc.)
  */
 interface CacheProvider<K : Any, V : Any> {
 
@@ -90,12 +90,4 @@ enum class CacheProviderType {
     HAZELCAST,
     EHCACHE,
     MEMORY
-}
-
-/**
- * Cache serialization interface for distributed caches
- */
-interface CacheSerializer<T> {
-    fun serialize(value: T): String
-    fun deserialize(data: String): T
 }
