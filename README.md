@@ -33,8 +33,6 @@ curl "http://localhost:8080/api/v1/weather/summary?locations=51.5074,-0.1278,48.
 # Get 5-day forecast for London
 curl "http://localhost:8080/api/v1/weather/locations/51.5074,-0.1278"
 
-# Check API info
-curl "http://localhost:8080/api/info"
 ```
 
 ## Project Structure
