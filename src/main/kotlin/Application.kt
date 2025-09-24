@@ -6,6 +6,7 @@ import com.shape.games.weather.infrastructure.config.configureMonitoring
 import com.shape.games.weather.infrastructure.config.configureSerialization
 import com.shape.games.weather.infrastructure.config.configureStatusPages
 import com.shape.games.weather.infrastructure.config.configureRateLimit
+import com.shape.games.weather.infrastructure.config.configureI18n
 import com.shape.games.weather.infrastructure.api.controllers.WeatherController
 import com.shape.games.weather.infrastructure.config.AppConfig
 import com.shape.games.weather.infrastructure.di.DependencyInjection
@@ -28,8 +29,9 @@ fun Application.module() {
     configureHTTP()
     configureSerialization()
     configureMonitoring()
-    configureRateLimit()
-    configureStatusPages()
+    configureI18n()
+    configureRateLimit(weatherConfig)
+    configureStatusPages(weatherConfig)
     configureRouting(weatherController)
 
     monitor.subscribe(ApplicationStopping) {

@@ -11,6 +11,7 @@ import com.shape.games.weather.domain.providers.WeatherProvider
 import com.shape.games.weather.domain.providers.WeatherProviderConfig
 import com.shape.games.weather.domain.providers.WeatherProviderType
 import com.shape.games.weather.domain.repositories.WeatherRepository
+import com.shape.games.weather.domain.services.WeatherRequestValidationService
 import com.shape.games.weather.infrastructure.config.WeatherConfig
 import com.shape.games.weather.infrastructure.factories.CacheProviderFactory
 import com.shape.games.weather.infrastructure.factories.WeatherProviderFactory
@@ -85,7 +86,7 @@ class DependencyInjection(private val config: WeatherConfig) {
             providerType = CacheProviderType.valueOf(config.cache.weather.provider.uppercase()),
             maxSize = config.cache.maxCacheSize,
             expireAfterWrite = config.cache.weather.durationMinutes.minutes,
-            namespace = "weather"
+            namespace = config.api.cacheNamespaces.weather
         )
         cacheProviderFactory.createProvider(cacheConfig)
     }
@@ -96,7 +97,7 @@ class DependencyInjection(private val config: WeatherConfig) {
             providerType = CacheProviderType.valueOf(config.cache.forecast.provider.uppercase()),
             maxSize = config.cache.maxCacheSize,
             expireAfterWrite = config.cache.forecast.durationMinutes.minutes,
-            namespace = "forecast"
+            namespace = config.api.cacheNamespaces.forecast
         )
         cacheProviderFactory.createProvider(cacheConfig)
     }
@@ -107,7 +108,7 @@ class DependencyInjection(private val config: WeatherConfig) {
             providerType = CacheProviderType.valueOf(config.cache.location.provider.uppercase()),
             maxSize = config.cache.maxCacheSize,
             expireAfterWrite = config.cache.location.durationMinutes.minutes,
-            namespace = "location"
+            namespace = config.api.cacheNamespaces.location
         )
         cacheProviderFactory.createProvider(cacheConfig)
     }
@@ -124,10 +125,19 @@ class DependencyInjection(private val config: WeatherConfig) {
     }
 
 
+
+    private val validationService: WeatherRequestValidationService by lazy {
+        logger.info("Initializing weather validation service")
+        WeatherRequestValidationService(
+            validationConfig = config.validation
+        )
+    }
+
     private val weatherService: WeatherService by lazy {
         logger.info("Initializing weather application service")
         WeatherService(
-            weatherRepository = weatherRepository
+            weatherRepository = weatherRepository,
+            validationService = validationService
         )
     }
 

@@ -1,20 +1,18 @@
 package com.shape.games.weather.domain.services
 
+import com.shape.games.weather.domain.exceptions.ValidationException
 import com.shape.games.weather.domain.valueobjects.Coordinates
 import com.shape.games.weather.domain.valueobjects.Temperature
 import com.shape.games.weather.domain.valueobjects.TemperatureUnit
+import com.shape.games.weather.infrastructure.config.ValidationConfig
 
 /**
  * Domain service for weather request validation
  * Encapsulates complex business rules and validation logic
  */
-class WeatherRequestValidationService {
-
-    companion object {
-        private const val MAX_LOCATIONS_PER_REQUEST = 50
-        private const val MIN_TEMPERATURE_THRESHOLD = -100.0
-        private const val MAX_TEMPERATURE_THRESHOLD = 100.0
-    }
+class WeatherRequestValidationService(
+    private val validationConfig: ValidationConfig
+) {
 
     /**
      * Validate weather summary request parameters
@@ -26,11 +24,17 @@ class WeatherRequestValidationService {
     ): Result<WeatherSummaryRequestData> {
 
         if (locationsParam.isNullOrBlank()) {
-            return Result.failure(IllegalArgumentException("Locations parameter is required"))
+            return Result.failure(ValidationException(
+                messageKey = "validation.locations.required",
+                message = "Locations parameter is required"
+            ))
         }
 
         if (temperatureParam.isNullOrBlank()) {
-            return Result.failure(IllegalArgumentException("Temperature parameter is required"))
+            return Result.failure(ValidationException(
+                messageKey = "validation.temperature.required",
+                message = "Temperature parameter is required"
+            ))
         }
 
 
@@ -41,12 +45,12 @@ class WeatherRequestValidationService {
 
         val coordinates = coordinatesResult.getOrThrow()
 
-        if (coordinates.size > MAX_LOCATIONS_PER_REQUEST) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "Too many locations requested. Maximum allowed: $MAX_LOCATIONS_PER_REQUEST, got: ${coordinates.size}"
-                )
-            )
+        if (coordinates.size > validationConfig.maxLocationsPerRequest) {
+            return Result.failure(ValidationException(
+                messageKey = "validation.locations.too_many",
+                parameters = arrayOf(validationConfig.maxLocationsPerRequest, coordinates.size),
+                message = "Too many locations requested. Maximum allowed: ${validationConfig.maxLocationsPerRequest}, got: ${coordinates.size}"
+            ))
         }
 
         val unitResult = TemperatureUnit.fromString(unitParam)
@@ -64,12 +68,12 @@ class WeatherRequestValidationService {
         val temperature = temperatureResult.getOrThrow()
 
         val tempInCelsius = temperature.toCelsius()
-        if (tempInCelsius < MIN_TEMPERATURE_THRESHOLD || tempInCelsius > MAX_TEMPERATURE_THRESHOLD) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "Temperature threshold out of reasonable range ($MIN_TEMPERATURE_THRESHOLD to $MAX_TEMPERATURE_THRESHOLD°C), got: ${temperature.format()}"
-                )
-            )
+        if (tempInCelsius < validationConfig.minTemperatureThreshold || tempInCelsius > validationConfig.maxTemperatureThreshold) {
+            return Result.failure(ValidationException(
+                messageKey = "validation.temperature.out_of_range",
+                parameters = arrayOf(validationConfig.minTemperatureThreshold, validationConfig.maxTemperatureThreshold, temperature.format()),
+                message = "Temperature threshold out of reasonable range (${validationConfig.minTemperatureThreshold} to ${validationConfig.maxTemperatureThreshold}°C), got: ${temperature.format()}"
+            ))
         }
 
         return Result.success(WeatherSummaryRequestData(coordinates, temperature))
@@ -80,7 +84,10 @@ class WeatherRequestValidationService {
      */
     fun validateLocationWeatherRequest(locationParam: String?): Result<Coordinates> {
         if (locationParam.isNullOrBlank()) {
-            return Result.failure(IllegalArgumentException("Location parameter is required"))
+            return Result.failure(ValidationException(
+                messageKey = "validation.location.required",
+                message = "Location parameter is required"
+            ))
         }
 
         return Coordinates.fromString(locationParam)

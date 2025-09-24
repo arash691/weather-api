@@ -3,10 +3,12 @@ package com.shape.games.weather.infrastructure.config
 import com.shape.games.weather.domain.exceptions.NotFoundException
 import com.shape.games.weather.domain.exceptions.RateLimitExceededException
 import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
+import com.shape.games.weather.domain.exceptions.ValidationException
 import com.shape.games.weather.presentation.dto.ErrorDetails
 import com.shape.games.weather.presentation.dto.ErrorResponse
 import com.shape.games.weather.presentation.dto.ResponseMetadata
 import io.ktor.http.*
+import io.ktor.i18n.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.calllogging.*
@@ -19,11 +21,9 @@ import io.ktor.server.response.*
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import java.text.MessageFormat
 import java.time.Instant
 
-/**
- * Configure HTTP features like CORS and default headers
- */
 fun Application.configureHTTP() {
     install(CORS) {
         allowMethod(HttpMethod.Options)
@@ -33,17 +33,15 @@ fun Application.configureHTTP() {
         allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.Accept)
-        anyHost() // For development - restrict in production
+        anyHost()
     }
 
     install(DefaultHeaders) {
-        header("X-Engine", "Ktor") // will send this header with each response
+        header("X-Engine", "Ktor")
     }
 }
 
-/**
- * Configure JSON serialization
- */
+
 fun Application.configureSerialization() {
     install(ContentNegotiation) {
         json(Json {
@@ -54,9 +52,7 @@ fun Application.configureSerialization() {
     }
 }
 
-/**
- * Configure monitoring and logging
- */
+
 fun Application.configureMonitoring() {
     install(CallLogging) {
         level = Level.INFO
@@ -71,21 +67,32 @@ fun Application.configureMonitoring() {
     }
 }
 
-/**
- * Configure global exception handling
- */
-fun Application.configureStatusPages() {
+fun Application.configureI18n() {
+    install(I18n) {}
+}
+
+
+fun Application.configureStatusPages(weatherConfig: WeatherConfig) {
     val logger = LoggerFactory.getLogger("GlobalExceptionHandler")
 
     install(StatusPages) {
-        // Handle specific exception types
-        exception<IllegalArgumentException> { call, cause ->
-            logger.warn("Validation error in ${call.request.uri}: ${cause.message}")
+        exception<ValidationException> { call, cause ->
+            logger.warn("Validation error in ${call.request.uri}: ${cause.messageKey}")
             call.respondError(
                 HttpStatusCode.BadRequest,
                 "VALIDATION_ERROR",
-                cause.message ?: "Invalid request parameter",
-                details = "Please check your request parameters and ensure they meet the required format."
+                call.getMessage(cause.messageKey, *cause.parameters),
+                details = call.getMessage("validation.error")
+            )
+        }
+
+        exception<IllegalArgumentException> { call, cause ->
+            logger.warn("Generic validation error in ${call.request.uri}: ${cause.message}")
+            call.respondError(
+                HttpStatusCode.BadRequest,
+                "VALIDATION_ERROR",
+                cause.message ?: call.getMessage("validation.error"),
+                details = call.getMessage("validation.error")
             )
         }
 
@@ -94,7 +101,7 @@ fun Application.configureStatusPages() {
             call.respondError(
                 HttpStatusCode.NotFound,
                 "NOT_FOUND",
-                cause.message ?: "Resource not found"
+                cause.message ?: call.getMessage("error.not_found")
             )
         }
 
@@ -103,7 +110,7 @@ fun Application.configureStatusPages() {
             call.respondError(
                 HttpStatusCode.TooManyRequests,
                 "RATE_LIMIT_EXCEEDED",
-                cause.message ?: "Rate limit exceeded"
+                cause.message ?: call.getMessage("ratelimit.exceeded")
             )
         }
 
@@ -114,12 +121,12 @@ fun Application.configureStatusPages() {
                 call.request.uri.contains("/weather") -> "weather API"
                 else -> "API"
             }
-            
+
             call.respondError(
                 HttpStatusCode.TooManyRequests,
                 "RATE_LIMIT_EXCEEDED",
-                "Rate limit exceeded for $rateLimitType. Please try again in $retryAfter seconds.",
-                details = "You have exceeded the allowed number of requests. Please implement client-side caching and space out your requests."
+                call.getMessage("ratelimit.exceeded.detailed", rateLimitType, retryAfter),
+                details = call.getMessage("ratelimit.exceeded")
             )
         }
 
@@ -128,26 +135,24 @@ fun Application.configureStatusPages() {
             call.respondError(
                 HttpStatusCode.ServiceUnavailable,
                 "SERVICE_UNAVAILABLE",
-                cause.message ?: "Service temporarily unavailable"
+                cause.message ?: call.getMessage("error.service_unavailable")
             )
         }
 
-        // Handle all other exceptions
         exception<Throwable> { call, cause ->
             logger.error("Unhandled exception in ${call.request.uri}", cause)
             call.respondError(
                 HttpStatusCode.InternalServerError,
                 "INTERNAL_ERROR",
-                "An unexpected error occurred"
+                call.getMessage("error.internal_error")
             )
         }
 
-        // Handle specific HTTP status codes
         status(HttpStatusCode.NotFound) { call, _ ->
             call.respondError(
                 HttpStatusCode.NotFound,
                 "NOT_FOUND",
-                "The requested endpoint was not found"
+                call.getMessage("error.not_found")
             )
         }
 
@@ -155,7 +160,7 @@ fun Application.configureStatusPages() {
             call.respondError(
                 HttpStatusCode.MethodNotAllowed,
                 "METHOD_NOT_ALLOWED",
-                "HTTP method not allowed for this endpoint"
+                call.getMessage("error.method_not_allowed")
             )
         }
 
@@ -163,15 +168,12 @@ fun Application.configureStatusPages() {
             call.respondError(
                 HttpStatusCode.UnsupportedMediaType,
                 "UNSUPPORTED_MEDIA_TYPE",
-                "Content type not supported"
+                call.getMessage("error.unsupported_media_type")
             )
         }
     }
 }
 
-/**
- * Extension function to create consistent error responses
- */
 suspend fun ApplicationCall.respondError(
     status: HttpStatusCode,
     errorCode: String,
@@ -200,6 +202,19 @@ suspend fun ApplicationCall.respondError(
         )
     )
     respond(status, errorResponse)
+}
+
+fun ApplicationCall.getMessage(key: String, vararg args: Any): String {
+    return try {
+        val message = this.i18n(key)
+        if (args.isNotEmpty()) {
+            MessageFormat.format(message, *args)
+        } else {
+            message
+        }
+    } catch (e: Exception) {
+        "!$key!"
+    }
 }
 
 

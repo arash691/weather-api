@@ -9,7 +9,6 @@ import kotlin.time.toJavaDuration
 
 /**
  * Caffeine-based cache provider implementation
- * High-performance in-memory cache with TTL and size limits
  */
 class CaffeineCacheProvider<K : Any, V : Any>(
     private val config: com.shape.games.weather.domain.cache.CacheConfig
@@ -76,16 +75,4 @@ class CaffeineCacheProvider<K : Any, V : Any>(
     }
 
     override suspend fun size(): Long = cache.estimatedSize()
-
-    override suspend fun isHealthy(): Boolean = true
-
-    /**
-     * Get cache configuration
-     */
-    fun getConfig(): com.shape.games.weather.domain.cache.CacheConfig = config
-
-    /**
-     * Get cache namespace
-     */
-    fun getNamespace(): String = config.namespace
 }

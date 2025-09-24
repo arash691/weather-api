@@ -12,6 +12,17 @@ package com.shape.games.weather.domain.exceptions
 class NotFoundException(message: String, cause: Throwable? = null) : DomainException(message, cause)
 
 /**
+ * Exception thrown when request validation fails with specific validation rules
+ * Contains the i18n message key for proper localization
+ */
+class ValidationException(
+    val messageKey: String,
+    val parameters: Array<Any> = emptyArray(),
+    message: String,
+    cause: Throwable? = null
+) : DomainException(message, cause)
+
+/**
  * Exception thrown when rate limit is exceeded
  * This represents a business rule about API usage limits
  */

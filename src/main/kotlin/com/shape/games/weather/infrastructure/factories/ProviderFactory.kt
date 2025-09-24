@@ -36,9 +36,6 @@ class CacheProviderFactory {
         return when (config.providerType) {
             CacheProviderType.CAFFEINE -> CaffeineCacheProvider(config)
             CacheProviderType.REDIS -> throw NotImplementedError("Redis provider not implemented yet")
-            CacheProviderType.HAZELCAST -> throw NotImplementedError("Hazelcast provider not implemented yet")
-            CacheProviderType.EHCACHE -> throw NotImplementedError("EhCache provider not implemented yet")
-            CacheProviderType.MEMORY -> CaffeineCacheProvider(config) // Use Caffeine as memory cache
         }
     }
 }

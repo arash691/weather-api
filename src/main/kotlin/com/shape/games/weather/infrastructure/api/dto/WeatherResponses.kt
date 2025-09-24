@@ -54,7 +54,7 @@ data class DailyForecastDto(
 @Serializable
 data class ResponseMetadata(
     val timestamp: String,
-    val requestId: String? = null // Keep for debugging support
+    val requestId: String? = null
 )
 
 @Serializable
@@ -67,5 +67,5 @@ data class ErrorResponse(
 data class ErrorDetails(
     val code: String,
     val message: String,
-    val details: String? = null // Keep some context, but simpler
+    val details: String? = null
 )

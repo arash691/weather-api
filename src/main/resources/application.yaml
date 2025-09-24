@@ -7,7 +7,7 @@ ktor:
 
 weather:
   provider:
-    type: "OPENWEATHERMAP"  # OPENWEATHERMAP, ACCUWEATHER, WEATHERAPI, DARK_SKY, WEATHERBIT
+    type: "OPENWEATHERMAP"
     fallbackEnabled: false
     fallbackProvider: null
 
@@ -27,3 +27,24 @@ cache:
     provider: "CAFFEINE"
     durationMinutes: 1440  # 24 hours
   maxCacheSize: 1000
+
+validation:
+  maxLocationsPerRequest: 50
+  minTemperatureThreshold: -100.0
+  maxTemperatureThreshold: 100.0
+  maxReasonableTemperature: 1000.0
+  absoluteZeroCelsius: -273.15
+
+rateLimit:
+  globalDailyLimit: 9000
+  perUserHourlyLimit: 100
+  burstLimit: 20
+  burstWindowMinutes: 5
+
+api:
+  defaultTemperatureUnit: "celsius"
+  defaultForecastDays: 5
+  cacheNamespaces:
+    weather: "weather"
+    forecast: "forecast"
+    location: "location"

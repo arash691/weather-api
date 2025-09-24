@@ -22,7 +22,6 @@ class WeatherController(
     suspend fun getWeatherSummary(call: ApplicationCall) {
         val requestId = generateRequestId()
 
-        // Add essential headers only
         call.response.headers.append("X-Request-ID", requestId)
         
         val locationsParam = call.request.queryParameters["locations"]
@@ -44,7 +43,6 @@ class WeatherController(
     suspend fun getLocationWeather(call: ApplicationCall) {
         val requestId = generateRequestId()
 
-        // Add essential headers only
         call.response.headers.append("X-Request-ID", requestId)
 
         val locationParam = call.parameters["locationId"]
@@ -65,7 +63,7 @@ class WeatherController(
                     date = forecast.date.toString(),
                     temperatureMin = forecast.temperatureMin.celsius,
                     temperatureMax = forecast.temperatureMax.celsius,
-                    temperatureUnit = "celsius",
+                        temperatureUnit = "celsius",
                     description = forecast.description,
                     humidity = forecast.humidity,
                     windSpeed = forecast.windSpeed,

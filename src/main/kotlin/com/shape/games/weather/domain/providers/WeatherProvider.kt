@@ -50,12 +50,6 @@ interface WeatherProvider {
     suspend fun isHealthy(): Boolean
 
     /**
-     * Get provider-specific rate limit information
-     * @return Rate limit info or null if not available
-     */
-    suspend fun getRateLimitInfo(): RateLimitInfo?
-
-    /**
      * Get provider name
      */
     fun getProviderName(): String
@@ -90,9 +84,7 @@ sealed class WeatherProviderError(val message: String, val code: String) {
     data class RateLimitExceeded(val errorMessage: String) : WeatherProviderError(errorMessage, "RATE_LIMIT_EXCEEDED")
     data class InvalidApiKey(val errorMessage: String) : WeatherProviderError(errorMessage, "INVALID_API_KEY")
     data class LocationNotFound(val errorMessage: String) : WeatherProviderError(errorMessage, "LOCATION_NOT_FOUND")
-    data class ProviderUnavailable(val errorMessage: String) :
-        WeatherProviderError(errorMessage, "PROVIDER_UNAVAILABLE")
-
+    data class ProviderUnavailable(val errorMessage: String) : WeatherProviderError(errorMessage, "PROVIDER_UNAVAILABLE")
     data class InvalidRequest(val errorMessage: String) : WeatherProviderError(errorMessage, "INVALID_REQUEST")
     data class UnknownError(val errorMessage: String) : WeatherProviderError(errorMessage, "UNKNOWN_ERROR")
 }

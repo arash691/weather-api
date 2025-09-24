@@ -50,11 +50,6 @@ interface CacheProvider<K : Any, V : Any> {
      * Get current cache size
      */
     suspend fun size(): Long
-
-    /**
-     * Check if the cache is healthy
-     */
-    suspend fun isHealthy(): Boolean
 }
 
 /**
@@ -86,8 +81,5 @@ data class CacheConfig(
  */
 enum class CacheProviderType {
     CAFFEINE,
-    REDIS,
-    HAZELCAST,
-    EHCACHE,
-    MEMORY
+    REDIS
 }

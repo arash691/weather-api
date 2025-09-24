@@ -16,50 +16,92 @@ object AppConfig {
 
         val config = application.environment.config
 
-        // Load weather provider configuration
         val weatherProviderConfig = WeatherProviderConfig(
-            type = config.propertyOrNull("weather.provider.type")?.getString() ?: "OPENWEATHERMAP",
+            type = config.propertyOrNull("weather.provider.type")?.getString()
+                ?: throw IllegalStateException("Weather provider type is required"),
             fallbackEnabled = config.propertyOrNull("weather.provider.fallbackEnabled")?.getString()?.toBoolean()
-                ?: false,
+                ?: throw IllegalStateException("Weather provider fallback enabled is required"),
             fallbackProvider = config.propertyOrNull("weather.provider.fallbackProvider")?.getString()
         )
 
-        // Load OpenWeatherMap configuration
         val openWeatherMapConfig = OpenWeatherMapConfig(
             apiKey = config.propertyOrNull("openweathermap.apiKey")?.getString()
                 ?: throw IllegalStateException("OpenWeatherMap API key is required"),
             baseUrl = config.propertyOrNull("openweathermap.baseUrl")?.getString()
-                ?: "https://api.openweathermap.org",
+                ?: throw IllegalStateException("OpenWeatherMap base URL is required"),
             timeoutMs = config.propertyOrNull("openweathermap.timeoutMs")?.getString()?.toLongOrNull()
-                ?: 30000
+                ?: throw IllegalStateException("OpenWeatherMap timeout is required")
         )
 
-
-        // Load cache configuration
         val cacheConfig = CacheConfig(
             weather = CacheTypeConfig(
-                provider = config.propertyOrNull("cache.weather.provider")?.getString() ?: "CAFFEINE",
+                provider = config.propertyOrNull("cache.weather.provider")?.getString()
+                    ?: throw IllegalStateException("Cache weather provider is required"),
                 durationMinutes = config.propertyOrNull("cache.weather.durationMinutes")?.getString()?.toIntOrNull()
-                    ?: 15
+                    ?: throw IllegalStateException("Cache weather duration is required")
             ),
             forecast = CacheTypeConfig(
-                provider = config.propertyOrNull("cache.forecast.provider")?.getString() ?: "CAFFEINE",
+                provider = config.propertyOrNull("cache.forecast.provider")?.getString()
+                    ?: throw IllegalStateException("Cache forecast provider is required"),
                 durationMinutes = config.propertyOrNull("cache.forecast.durationMinutes")?.getString()?.toIntOrNull()
-                    ?: 60
+                    ?: throw IllegalStateException("Cache forecast duration is required")
             ),
             location = CacheTypeConfig(
-                provider = config.propertyOrNull("cache.location.provider")?.getString() ?: "CAFFEINE",
+                provider = config.propertyOrNull("cache.location.provider")?.getString()
+                    ?: throw IllegalStateException("Cache location provider is required"),
                 durationMinutes = config.propertyOrNull("cache.location.durationMinutes")?.getString()?.toIntOrNull()
-                    ?: 1440
+                    ?: throw IllegalStateException("Cache location duration is required")
             ),
             maxCacheSize = config.propertyOrNull("cache.maxCacheSize")?.getString()?.toLongOrNull()
-                ?: 1000
+                ?: throw IllegalStateException("Cache max size is required")
+        )
+
+        val validationConfig = ValidationConfig(
+            maxLocationsPerRequest = config.propertyOrNull("validation.maxLocationsPerRequest")?.getString()?.toIntOrNull()
+                ?: throw IllegalStateException("Validation max locations per request is required"),
+            minTemperatureThreshold = config.propertyOrNull("validation.minTemperatureThreshold")?.getString()?.toDoubleOrNull()
+                ?: throw IllegalStateException("Validation min temperature threshold is required"),
+            maxTemperatureThreshold = config.propertyOrNull("validation.maxTemperatureThreshold")?.getString()?.toDoubleOrNull()
+                ?: throw IllegalStateException("Validation max temperature threshold is required"),
+            maxReasonableTemperature = config.propertyOrNull("validation.maxReasonableTemperature")?.getString()?.toDoubleOrNull()
+                ?: throw IllegalStateException("Validation max reasonable temperature is required"),
+            absoluteZeroCelsius = config.propertyOrNull("validation.absoluteZeroCelsius")?.getString()?.toDoubleOrNull()
+                ?: throw IllegalStateException("Validation absolute zero celsius is required")
+        )
+
+        val rateLimitConfig = RateLimitConfig(
+            globalDailyLimit = config.propertyOrNull("rateLimit.globalDailyLimit")?.getString()?.toIntOrNull()
+                ?: throw IllegalStateException("Rate limit global daily limit is required"),
+            perUserHourlyLimit = config.propertyOrNull("rateLimit.perUserHourlyLimit")?.getString()?.toIntOrNull()
+                ?: throw IllegalStateException("Rate limit per user hourly limit is required"),
+            burstLimit = config.propertyOrNull("rateLimit.burstLimit")?.getString()?.toIntOrNull()
+                ?: throw IllegalStateException("Rate limit burst limit is required"),
+            burstWindowMinutes = config.propertyOrNull("rateLimit.burstWindowMinutes")?.getString()?.toIntOrNull()
+                ?: throw IllegalStateException("Rate limit burst window minutes is required")
+        )
+
+        val apiConfig = ApiConfig(
+            defaultTemperatureUnit = config.propertyOrNull("api.defaultTemperatureUnit")?.getString()
+                ?: throw IllegalStateException("API default temperature unit is required"),
+            defaultForecastDays = config.propertyOrNull("api.defaultForecastDays")?.getString()?.toIntOrNull()
+                ?: throw IllegalStateException("API default forecast days is required"),
+            cacheNamespaces = CacheNamespaces(
+                weather = config.propertyOrNull("api.cacheNamespaces.weather")?.getString()
+                    ?: throw IllegalStateException("API cache namespace for weather is required"),
+                forecast = config.propertyOrNull("api.cacheNamespaces.forecast")?.getString()
+                    ?: throw IllegalStateException("API cache namespace for forecast is required"),
+                location = config.propertyOrNull("api.cacheNamespaces.location")?.getString()
+                    ?: throw IllegalStateException("API cache namespace for location is required")
+            )
         )
 
         val weatherConfig = WeatherConfig(
             weatherProvider = weatherProviderConfig,
             openWeatherMap = openWeatherMapConfig,
-            cache = cacheConfig
+            cache = cacheConfig,
+            validation = validationConfig,
+            rateLimit = rateLimitConfig,
+            api = apiConfig
         )
 
         logger.info("Configuration loaded successfully")

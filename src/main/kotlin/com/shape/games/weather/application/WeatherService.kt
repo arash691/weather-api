@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
  */
 class WeatherService(
     private val weatherRepository: WeatherRepository,
-    private val validationService: WeatherRequestValidationService = WeatherRequestValidationService()
+    private val validationService: WeatherRequestValidationService
 ) {
 
     private val logger = LoggerFactory.getLogger(WeatherService::class.java)

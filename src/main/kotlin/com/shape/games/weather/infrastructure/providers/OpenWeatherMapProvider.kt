@@ -162,12 +162,6 @@ class OpenWeatherMapProvider(
         }
     }
 
-    override suspend fun getRateLimitInfo(): RateLimitInfo? {
-        // OpenWeatherMap doesn't provide rate limit info in response headers
-        // This would need to be tracked separately
-        return null
-    }
-
     override fun getProviderName(): String = "OpenWeatherMap"
 }
 
