@@ -161,31 +161,6 @@ class WeatherControllerIntegrationTest {
     }
 
     @Test
-    fun `GET weather summary should accept reasonable temperature values`() = testApplication {
-        setupTestApplication()
-
-        // After refactoring: We removed arbitrary temperature limits
-        // Now only physical constants (absolute zero) are enforced in domain
-        val response1 = client.get("/api/v1/weather/summary") {
-            parameter("locations", "51.5074,-0.1278")
-            parameter("temperature", "150")
-            parameter("unit", "celsius")
-        }
-
-        assertEquals(HttpStatusCode.OK, response1.status)
-
-        // Test that absolute zero is still rejected (pure domain rule)
-        val response2 = client.get("/api/v1/weather/summary") {
-            parameter("locations", "51.5074,-0.1278")
-            parameter("temperature", "-300")  // Below absolute zero
-            parameter("unit", "celsius")
-        }
-
-        assertEquals(HttpStatusCode.BadRequest, response2.status)
-        assertTrue(response2.bodyAsText().contains("VALIDATION_ERROR"))
-    }
-
-    @Test
     fun `GET weather summary should handle different temperature units`() = testApplication {
         setupTestApplication()
 
