@@ -1,902 +1,902 @@
 {
-	"info": {
-		"_postman_id": "weather-api-collection",
-		"name": "Weather API Collection",
-		"description": "Complete collection for testing the Weather API endpoints with rate limiting, caching, and validation",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Weather Summary",
-			"item": [
-				{
-					"name": "Get Weather Summary - Single Location",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response has correct structure\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('locations');",
-									"    pm.expect(jsonData.locations).to.be.an('array');",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 2000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
-									"});",
-									"",
-									"pm.test(\"Has rate limit headers\", function () {",
-									"    pm.expect(pm.response.headers.get('X-RateLimit-Remaining')).to.exist;",
-									"});",
-									"",
-									"pm.test(\"Has request ID\", function () {",
-									"    pm.expect(pm.response.headers.get('X-Request-ID')).to.exist;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "en"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=20&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "51.5074,-0.1278",
-									"description": "London coordinates"
-								},
-								{
-									"key": "temperature",
-									"value": "20",
-									"description": "Temperature threshold in Celsius"
-								},
-								{
-									"key": "unit",
-									"value": "celsius",
-									"description": "Temperature unit (celsius/fahrenheit)"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Weather Summary - Multiple Locations",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response contains multiple locations\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.locations).to.be.an('array');",
-									"    // May contain 0 or more locations depending on temperature threshold",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278;48.8566,2.3522;40.7128,-74.0060&temperature=15&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "51.5074,-0.1278;48.8566,2.3522;40.7128,-74.0060",
-									"description": "London, Paris, New York coordinates"
-								},
-								{
-									"key": "temperature",
-									"value": "15",
-									"description": "Temperature threshold"
-								},
-								{
-									"key": "unit",
-									"value": "celsius"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Weather Summary - Fahrenheit",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Temperature unit is handled correctly\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('locations');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=68&unit=fahrenheit",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "51.5074,-0.1278"
-								},
-								{
-									"key": "temperature",
-									"value": "68",
-									"description": "68°F = 20°C"
-								},
-								{
-									"key": "unit",
-									"value": "fahrenheit"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Weather Summary - Missing Parameters (400)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"pm.test(\"Error response has correct structure\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('error');",
-									"    pm.expect(jsonData).to.have.property('code');",
-									"    pm.expect(jsonData).to.have.property('timestamp');",
-									"});",
-									"",
-									"pm.test(\"Error code is VALIDATION_ERROR\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?temperature=20&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "temperature",
-									"value": "20"
-								},
-								{
-									"key": "unit",
-									"value": "celsius"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Weather Summary - Invalid Coordinates (400)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"pm.test(\"Error indicates validation failure\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=invalid_coordinates&temperature=20&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "invalid_coordinates"
-								},
-								{
-									"key": "temperature",
-									"value": "20"
-								},
-								{
-									"key": "unit",
-									"value": "celsius"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Location Weather",
-			"item": [
-				{
-					"name": "Get Location Weather Details - London",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response has location details\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('location');",
-									"    pm.expect(jsonData).to.have.property('currentTemperature');",
-									"    pm.expect(jsonData).to.have.property('forecast');",
-									"});",
-									"",
-									"pm.test(\"Forecast is an array\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.forecast).to.be.an('array');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/locations/51.5074,-0.1278",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"locations",
-								"51.5074,-0.1278"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Location Weather Details - Paris",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Location coordinates match request\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.location).to.have.property('coordinates');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/locations/48.8566,2.3522",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"locations",
-								"48.8566,2.3522"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Location Weather - Invalid Coordinates (400)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"pm.test(\"Error response structure\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('error');",
-									"    pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/locations/invalid_location",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"locations",
-								"invalid_location"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Rate Limiting Tests",
-			"item": [
-				{
-					"name": "Rate Limit Test - Burst Requests",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200 or 429\", function () {",
-									"    pm.expect([200, 429]).to.include(pm.response.code);",
-									"});",
-									"",
-									"pm.test(\"Rate limit headers present\", function () {",
-									"    pm.expect(pm.response.headers.get('X-RateLimit-Remaining')).to.exist;",
-									"});",
-									"",
-									"if (pm.response.code === 429) {",
-									"    pm.test(\"Rate limit exceeded response\", function () {",
-									"        const jsonData = pm.response.json();",
-									"        pm.expect(jsonData.code).to.equal('RATE_LIMIT_EXCEEDED');",
-									"        pm.expect(pm.response.headers.get('Retry-After')).to.exist;",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=20&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "51.5074,-0.1278"
-								},
-								{
-									"key": "temperature",
-									"value": "20"
-								},
-								{
-									"key": "unit",
-									"value": "celsius"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Cache Testing",
-			"item": [
-				{
-					"name": "Cache Test - First Request",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Store response time for cache comparison",
-									"pm.globals.set('firstRequestTime', pm.response.responseTime);",
-									"pm.globals.set('firstRequestBody', pm.response.text());"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=20&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "51.5074,-0.1278"
-								},
-								{
-									"key": "temperature",
-									"value": "20"
-								},
-								{
-									"key": "unit",
-									"value": "celsius"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Cache Test - Second Request (Should be faster)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response is consistent with first request\", function () {",
-									"    const firstRequestBody = pm.globals.get('firstRequestBody');",
-									"    pm.expect(pm.response.text()).to.equal(firstRequestBody);",
-									"});",
-									"",
-									"pm.test(\"Second request should be faster (cached)\", function () {",
-									"    const firstRequestTime = parseInt(pm.globals.get('firstRequestTime'));",
-									"    const secondRequestTime = pm.response.responseTime;",
-									"    ",
-									"    // Cache should make it faster, but this is not always guaranteed",
-									"    // in test environments, so we just check it's reasonable",
-									"    pm.expect(secondRequestTime).to.be.below(2000);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=20&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "51.5074,-0.1278"
-								},
-								{
-									"key": "temperature",
-									"value": "20"
-								},
-								{
-									"key": "unit",
-									"value": "celsius"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Edge Cases",
-			"item": [
-				{
-					"name": "Boundary Coordinates - North Pole",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is not 500\", function () {",
-									"    pm.expect(pm.response.code).to.not.equal(500);",
-									"});",
-									"",
-									"pm.test(\"Response is handled gracefully\", function () {",
-									"    // Should either succeed or return proper error",
-									"    pm.expect([200, 400, 404]).to.include(pm.response.code);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=90,0&temperature=20&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "90,0",
-									"description": "North Pole coordinates"
-								},
-								{
-									"key": "temperature",
-									"value": "20"
-								},
-								{
-									"key": "unit",
-									"value": "celsius"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Extreme Temperature Threshold",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400 (validation error)\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"pm.test(\"Error indicates validation failure\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=1500&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "51.5074,-0.1278"
-								},
-								{
-									"key": "temperature",
-									"value": "1500",
-									"description": "Unreasonably high temperature"
-								},
-								{
-									"key": "unit",
-									"value": "celsius"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Maximum Locations Test",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400 or 200\", function () {",
-									"    // Should either accept or reject based on max limit",
-									"    pm.expect([200, 400]).to.include(pm.response.code);",
-									"});",
-									"",
-									"if (pm.response.code === 400) {",
-									"    pm.test(\"Error indicates too many locations\", function () {",
-									"        const jsonData = pm.response.json();",
-									"        pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278;48.8566,2.3522;40.7128,-74.0060;35.6762,139.6503;-33.8688,151.2093;55.7558,37.6173;52.5200,13.4050;41.9028,12.4964;39.9042,116.4074;-22.9068,-43.1729&temperature=20&unit=celsius",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"weather",
-								"summary"
-							],
-							"query": [
-								{
-									"key": "locations",
-									"value": "51.5074,-0.1278;48.8566,2.3522;40.7128,-74.0060;35.6762,139.6503;-33.8688,151.2093;55.7558,37.6173;52.5200,13.4050;41.9028,12.4964;39.9042,116.4074;-22.9068,-43.1729",
-									"description": "10 major cities worldwide"
-								},
-								{
-									"key": "temperature",
-									"value": "20"
-								},
-								{
-									"key": "unit",
-									"value": "celsius"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					"// Set base URL if not already set",
-					"if (!pm.variables.get('baseUrl')) {",
-					"    pm.variables.set('baseUrl', 'http://localhost:8080');",
-					"}",
-					"",
-					"// Add timestamp to requests for uniqueness",
-					"pm.variables.set('timestamp', Date.now());"
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					"// Global test to ensure no 500 errors",
-					"pm.test(\"No server errors (500)\", function () {",
-					"    pm.expect(pm.response.code).to.not.equal(500);",
-					"});",
-					"",
-					"// Global test for response time",
-					"pm.test(\"Response time is reasonable\", function () {",
-					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-					"});",
-					"",
-					"// Log rate limit info if available",
-					"const rateLimitRemaining = pm.response.headers.get('X-RateLimit-Remaining');",
-					"if (rateLimitRemaining) {",
-					"    console.log('Rate Limit Remaining:', rateLimitRemaining);",
-					"}",
-					"",
-					"const requestId = pm.response.headers.get('X-Request-ID');",
-					"if (requestId) {",
-					"    console.log('Request ID:', requestId);",
-					"}"
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:8080",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "weather-api-collection",
+    "name": "Weather API Collection",
+    "description": "Complete collection for testing the Weather API endpoints with rate limiting, caching, and validation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Weather Summary",
+      "item": [
+        {
+          "name": "Get Weather Summary - Single Location",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct structure\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('locations');",
+                  "    pm.expect(jsonData.locations).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 2000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test(\"Has rate limit headers\", function () {",
+                  "    pm.expect(pm.response.headers.get('X-RateLimit-Remaining')).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Has request ID\", function () {",
+                  "    pm.expect(pm.response.headers.get('X-Request-ID')).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept-Language",
+                "value": "en"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=20&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "51.5074,-0.1278",
+                  "description": "London coordinates"
+                },
+                {
+                  "key": "temperature",
+                  "value": "20",
+                  "description": "Temperature threshold in Celsius"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius",
+                  "description": "Temperature unit (celsius/fahrenheit)"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Weather Summary - Multiple Locations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains multiple locations\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.locations).to.be.an('array');",
+                  "    // May contain 0 or more locations depending on temperature threshold",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278;48.8566,2.3522;40.7128,-74.0060&temperature=15&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "51.5074,-0.1278;48.8566,2.3522;40.7128,-74.0060",
+                  "description": "London, Paris, New York coordinates"
+                },
+                {
+                  "key": "temperature",
+                  "value": "15",
+                  "description": "Temperature threshold"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Weather Summary - Fahrenheit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Temperature unit is handled correctly\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('locations');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=68&unit=fahrenheit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "51.5074,-0.1278"
+                },
+                {
+                  "key": "temperature",
+                  "value": "68",
+                  "description": "68°F = 20°C"
+                },
+                {
+                  "key": "unit",
+                  "value": "fahrenheit"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Weather Summary - Missing Parameters (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error response has correct structure\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData).to.have.property('code');",
+                  "    pm.expect(jsonData).to.have.property('timestamp');",
+                  "});",
+                  "",
+                  "pm.test(\"Error code is VALIDATION_ERROR\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?temperature=20&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "temperature",
+                  "value": "20"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Weather Summary - Invalid Coordinates (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error indicates validation failure\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=invalid_coordinates&temperature=20&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "invalid_coordinates"
+                },
+                {
+                  "key": "temperature",
+                  "value": "20"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Location Weather",
+      "item": [
+        {
+          "name": "Get Location Weather Details - London",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has location details\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('location');",
+                  "    pm.expect(jsonData).to.have.property('currentTemperature');",
+                  "    pm.expect(jsonData).to.have.property('forecast');",
+                  "});",
+                  "",
+                  "pm.test(\"Forecast is an array\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.forecast).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/locations/51.5074,-0.1278",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "locations",
+                "51.5074,-0.1278"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Location Weather Details - Paris",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Location coordinates match request\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.location).to.have.property('coordinates');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/locations/48.8566,2.3522",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "locations",
+                "48.8566,2.3522"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Location Weather - Invalid Coordinates (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error response structure\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/locations/invalid_location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "locations",
+                "invalid_location"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rate Limiting Tests",
+      "item": [
+        {
+          "name": "Rate Limit Test - Burst Requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 429\", function () {",
+                  "    pm.expect([200, 429]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test(\"Rate limit headers present\", function () {",
+                  "    pm.expect(pm.response.headers.get('X-RateLimit-Remaining')).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 429) {",
+                  "    pm.test(\"Rate limit exceeded response\", function () {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.code).to.equal('RATE_LIMIT_EXCEEDED');",
+                  "        pm.expect(pm.response.headers.get('Retry-After')).to.exist;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=20&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "51.5074,-0.1278"
+                },
+                {
+                  "key": "temperature",
+                  "value": "20"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cache Testing",
+      "item": [
+        {
+          "name": "Cache Test - First Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Store response time for cache comparison",
+                  "pm.globals.set('firstRequestTime', pm.response.responseTime);",
+                  "pm.globals.set('firstRequestBody', pm.response.text());"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=20&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "51.5074,-0.1278"
+                },
+                {
+                  "key": "temperature",
+                  "value": "20"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cache Test - Second Request (Should be faster)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is consistent with first request\", function () {",
+                  "    const firstRequestBody = pm.globals.get('firstRequestBody');",
+                  "    pm.expect(pm.response.text()).to.equal(firstRequestBody);",
+                  "});",
+                  "",
+                  "pm.test(\"Second request should be faster (cached)\", function () {",
+                  "    const firstRequestTime = parseInt(pm.globals.get('firstRequestTime'));",
+                  "    const secondRequestTime = pm.response.responseTime;",
+                  "    ",
+                  "    // Cache should make it faster, but this is not always guaranteed",
+                  "    // in test environments, so we just check it's reasonable",
+                  "    pm.expect(secondRequestTime).to.be.below(2000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=20&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "51.5074,-0.1278"
+                },
+                {
+                  "key": "temperature",
+                  "value": "20"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Edge Cases",
+      "item": [
+        {
+          "name": "Boundary Coordinates - North Pole",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is not 500\", function () {",
+                  "    pm.expect(pm.response.code).to.not.equal(500);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is handled gracefully\", function () {",
+                  "    // Should either succeed or return proper error",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=90,0&temperature=20&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "90,0",
+                  "description": "North Pole coordinates"
+                },
+                {
+                  "key": "temperature",
+                  "value": "20"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Extreme Temperature Threshold",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 (validation error)\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error indicates validation failure\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278&temperature=1500&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "51.5074,-0.1278"
+                },
+                {
+                  "key": "temperature",
+                  "value": "1500",
+                  "description": "Unreasonably high temperature"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Maximum Locations Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 or 200\", function () {",
+                  "    // Should either accept or reject based on max limit",
+                  "    pm.expect([200, 400]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 400) {",
+                  "    pm.test(\"Error indicates too many locations\", function () {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.code).to.equal('VALIDATION_ERROR');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/summary?locations=51.5074,-0.1278;48.8566,2.3522;40.7128,-74.0060;35.6762,139.6503;-33.8688,151.2093;55.7558,37.6173;52.5200,13.4050;41.9028,12.4964;39.9042,116.4074;-22.9068,-43.1729&temperature=20&unit=celsius",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "locations",
+                  "value": "51.5074,-0.1278;48.8566,2.3522;40.7128,-74.0060;35.6762,139.6503;-33.8688,151.2093;55.7558,37.6173;52.5200,13.4050;41.9028,12.4964;39.9042,116.4074;-22.9068,-43.1729",
+                  "description": "10 major cities worldwide"
+                },
+                {
+                  "key": "temperature",
+                  "value": "20"
+                },
+                {
+                  "key": "unit",
+                  "value": "celsius"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set base URL if not already set",
+          "if (!pm.variables.get('baseUrl')) {",
+          "    pm.variables.set('baseUrl', 'http://localhost:8080');",
+          "}",
+          "",
+          "// Add timestamp to requests for uniqueness",
+          "pm.variables.set('timestamp', Date.now());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test to ensure no 500 errors",
+          "pm.test(\"No server errors (500)\", function () {",
+          "    pm.expect(pm.response.code).to.not.equal(500);",
+          "});",
+          "",
+          "// Global test for response time",
+          "pm.test(\"Response time is reasonable\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Log rate limit info if available",
+          "const rateLimitRemaining = pm.response.headers.get('X-RateLimit-Remaining');",
+          "if (rateLimitRemaining) {",
+          "    console.log('Rate Limit Remaining:', rateLimitRemaining);",
+          "}",
+          "",
+          "const requestId = pm.response.headers.get('X-Request-ID');",
+          "if (requestId) {",
+          "    console.log('Request ID:', requestId);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
 }

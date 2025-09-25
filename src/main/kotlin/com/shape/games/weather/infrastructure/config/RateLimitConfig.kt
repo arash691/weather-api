@@ -24,7 +24,10 @@ fun Application.configureRateLimit(weatherConfig: WeatherConfig) {
         }
 
         register(RateLimitName("weather-burst")) {
-            rateLimiter(limit = weatherConfig.rateLimit.burstLimit, refillPeriod = weatherConfig.rateLimit.burstWindowMinutes.minutes)
+            rateLimiter(
+                limit = weatherConfig.rateLimit.burstLimit,
+                refillPeriod = weatherConfig.rateLimit.burstWindowMinutes.minutes
+            )
             requestKey { call ->
                 "burst-${call.request.local.remoteHost}" // it's better to use some info from user_token
             }

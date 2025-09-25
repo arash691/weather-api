@@ -56,19 +56,6 @@ object AppConfig {
                 ?: throw IllegalStateException("Cache max size is required")
         )
 
-        val validationConfig = ValidationConfig(
-            maxLocationsPerRequest = config.propertyOrNull("validation.maxLocationsPerRequest")?.getString()?.toIntOrNull()
-                ?: throw IllegalStateException("Validation max locations per request is required"),
-            minTemperatureThreshold = config.propertyOrNull("validation.minTemperatureThreshold")?.getString()?.toDoubleOrNull()
-                ?: throw IllegalStateException("Validation min temperature threshold is required"),
-            maxTemperatureThreshold = config.propertyOrNull("validation.maxTemperatureThreshold")?.getString()?.toDoubleOrNull()
-                ?: throw IllegalStateException("Validation max temperature threshold is required"),
-            maxReasonableTemperature = config.propertyOrNull("validation.maxReasonableTemperature")?.getString()?.toDoubleOrNull()
-                ?: throw IllegalStateException("Validation max reasonable temperature is required"),
-            absoluteZeroCelsius = config.propertyOrNull("validation.absoluteZeroCelsius")?.getString()?.toDoubleOrNull()
-                ?: throw IllegalStateException("Validation absolute zero celsius is required")
-        )
-
         val rateLimitConfig = RateLimitConfig(
             globalDailyLimit = config.propertyOrNull("rateLimit.globalDailyLimit")?.getString()?.toIntOrNull()
                 ?: throw IllegalStateException("Rate limit global daily limit is required"),
@@ -99,7 +86,6 @@ object AppConfig {
             weatherProvider = weatherProviderConfig,
             openWeatherMap = openWeatherMapConfig,
             cache = cacheConfig,
-            validation = validationConfig,
             rateLimit = rateLimitConfig,
             api = apiConfig
         )

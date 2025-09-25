@@ -2,7 +2,8 @@ package com.shape.games.weather.domain.valueobjects
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class CoordinatesTest {
 
@@ -18,7 +19,7 @@ class CoordinatesTest {
         val northPole = Coordinates.of(90.0, 0.0)
         val southPole = Coordinates.of(-90.0, 0.0)
         val dateLine = Coordinates.of(0.0, 180.0)
-        
+
         assertEquals(90.0, northPole.latitude)
         assertEquals(-90.0, southPole.latitude)
         assertEquals(180.0, dateLine.longitude)
@@ -48,7 +49,7 @@ class CoordinatesTest {
     fun `should parse single coordinate string correctly`() {
         val result = Coordinates.fromString("51.5074,-0.1278")
         assertTrue(result.isSuccess)
-        
+
         val coords = result.getOrThrow()
         assertEquals(51.5074, coords.latitude)
         assertEquals(-0.1278, coords.longitude)
@@ -58,7 +59,7 @@ class CoordinatesTest {
     fun `should parse multiple coordinates correctly`() {
         val result = Coordinates.fromMultipleString("51.5074,-0.1278,40.7128,-74.0060")
         assertTrue(result.isSuccess)
-        
+
         val coordsList = result.getOrThrow()
         assertEquals(2, coordsList.size)
         assertEquals(51.5074, coordsList[0].latitude)

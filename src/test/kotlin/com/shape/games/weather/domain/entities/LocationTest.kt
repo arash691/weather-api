@@ -2,7 +2,7 @@ package com.shape.games.weather.domain.entities
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.*
+import kotlin.test.assertEquals
 
 class LocationTest {
 
@@ -10,12 +10,12 @@ class LocationTest {
     fun `should create valid location`() {
         val location = Location(
             id = "london",
-            name = "London", 
+            name = "London",
             latitude = 51.5074,
             longitude = -0.1278,
             country = "United Kingdom"
         )
-        
+
         assertEquals("london", location.id)
         assertEquals("London", location.name)
         assertEquals(51.5074, location.latitude)
@@ -28,11 +28,11 @@ class LocationTest {
         assertThrows<IllegalArgumentException> {
             Location("", "London", 51.5074, -0.1278, "UK")
         }
-        
+
         assertThrows<IllegalArgumentException> {
             Location("london", "", 51.5074, -0.1278, "UK")
         }
-        
+
         assertThrows<IllegalArgumentException> {
             Location("london", "London", 51.5074, -0.1278, "")
         }
@@ -43,7 +43,7 @@ class LocationTest {
         assertThrows<IllegalArgumentException> {
             Location("test", "Test", 91.0, 0.0, "Country")
         }
-        
+
         assertThrows<IllegalArgumentException> {
             Location("test", "Test", 0.0, 181.0, "Country")
         }
@@ -53,7 +53,7 @@ class LocationTest {
     fun `should accept coordinates at boundaries`() {
         val northPole = Location("np", "North Pole", 90.0, 0.0, "Arctic")
         val southPole = Location("sp", "South Pole", -90.0, 0.0, "Antarctica")
-        
+
         assertEquals(90.0, northPole.latitude)
         assertEquals(-90.0, southPole.latitude)
     }

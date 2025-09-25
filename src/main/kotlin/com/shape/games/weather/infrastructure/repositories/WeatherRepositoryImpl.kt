@@ -1,17 +1,16 @@
 package com.shape.games.weather.infrastructure.repositories
 
-import com.shape.games.weather.domain.cache.CacheProvider
 import com.shape.games.weather.domain.entities.Location
 import com.shape.games.weather.domain.entities.WeatherData
 import com.shape.games.weather.domain.entities.WeatherForecast
 import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
-import com.shape.games.weather.domain.providers.WeatherProvider
 import com.shape.games.weather.domain.repositories.WeatherRepository
+import com.shape.games.weather.infrastructure.cache.CacheProvider
+import com.shape.games.weather.infrastructure.providers.WeatherProvider
 import org.slf4j.LoggerFactory
 
 /**
  * Implementation of WeatherRepository using external weather provider and caching
- * This is the infrastructure layer implementation that handles data access concerns
  */
 class WeatherRepositoryImpl(
     private val weatherProvider: WeatherProvider,
@@ -25,13 +24,11 @@ class WeatherRepositoryImpl(
     override suspend fun getCurrentWeather(location: Location): WeatherData? {
         val cacheKey = "weather_${location.id}"
 
-        // Try cache first
         weatherCache.get(cacheKey)?.let { cachedWeather ->
             logger.debug("Found cached weather data for location: {}", location.name)
             return cachedWeather
         }
 
-        // Fetch from provider if not in cache
         return try {
             logger.debug("Fetching weather data from provider for location: {}", location.name)
             val result = weatherProvider.getCurrentWeather(location.latitude, location.longitude)
@@ -52,13 +49,11 @@ class WeatherRepositoryImpl(
     override suspend fun getForecast(location: Location, days: Int): WeatherForecast? {
         val cacheKey = "forecast_${location.id}_${days}d"
 
-        // Try cache first
         forecastCache.get(cacheKey)?.let { cachedForecast ->
             logger.debug("Found cached forecast data for location: {}", location.name)
             return cachedForecast
         }
 
-        // Fetch from provider if not in cache
         return try {
             logger.debug("Fetching forecast data from provider for location: {}", location.name)
             val result = weatherProvider.getForecast(location.latitude, location.longitude, days)
@@ -77,13 +72,12 @@ class WeatherRepositoryImpl(
     }
 
     override suspend fun getLocationById(locationId: String): Location? {
-        // Try cache first
+
         locationCache.get(locationId)?.let { cachedLocation ->
             logger.debug("Found cached location data for ID: {}", locationId)
             return cachedLocation
         }
 
-        // Parse coordinates from locationId (format: "lat,lon")
         val parts = locationId.split(",")
         if (parts.size != 2) {
             logger.warn("Invalid location ID format: {}", locationId)
@@ -98,7 +92,6 @@ class WeatherRepositoryImpl(
             return null
         }
 
-        // Fetch from provider if not in cache
         return try {
             logger.debug("Fetching location data from provider for coordinates: {},{}", lat, lon)
             val result = weatherProvider.getLocationDetails(lat, lon)
@@ -126,7 +119,6 @@ class WeatherRepositoryImpl(
                 }
             } catch (e: Exception) {
                 logger.warn("Failed to fetch location for ID: {}", locationId, e)
-                // Continue with other locations
             }
         }
 

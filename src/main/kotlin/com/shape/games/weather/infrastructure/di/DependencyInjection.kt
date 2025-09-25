@@ -1,20 +1,19 @@
 package com.shape.games.weather.infrastructure.di
 
 import com.shape.games.weather.application.WeatherService
-import com.shape.games.weather.domain.cache.CacheConfig
-import com.shape.games.weather.domain.cache.CacheProvider
-import com.shape.games.weather.domain.cache.CacheProviderType
 import com.shape.games.weather.domain.entities.Location
 import com.shape.games.weather.domain.entities.WeatherData
 import com.shape.games.weather.domain.entities.WeatherForecast
-import com.shape.games.weather.domain.providers.WeatherProvider
-import com.shape.games.weather.domain.providers.WeatherProviderConfig
-import com.shape.games.weather.domain.providers.WeatherProviderType
 import com.shape.games.weather.domain.repositories.WeatherRepository
-import com.shape.games.weather.domain.services.WeatherRequestValidationService
+import com.shape.games.weather.infrastructure.cache.CacheConfig
+import com.shape.games.weather.infrastructure.cache.CacheProvider
+import com.shape.games.weather.infrastructure.cache.CacheProviderType
 import com.shape.games.weather.infrastructure.config.WeatherConfig
 import com.shape.games.weather.infrastructure.factories.CacheProviderFactory
 import com.shape.games.weather.infrastructure.factories.WeatherProviderFactory
+import com.shape.games.weather.infrastructure.providers.WeatherProvider
+import com.shape.games.weather.infrastructure.providers.WeatherProviderConfig
+import com.shape.games.weather.infrastructure.providers.WeatherProviderType
 import com.shape.games.weather.infrastructure.repositories.WeatherRepositoryImpl
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -125,19 +124,10 @@ class DependencyInjection(private val config: WeatherConfig) {
     }
 
 
-
-    private val validationService: WeatherRequestValidationService by lazy {
-        logger.info("Initializing weather validation service")
-        WeatherRequestValidationService(
-            validationConfig = config.validation
-        )
-    }
-
     private val weatherService: WeatherService by lazy {
         logger.info("Initializing weather application service")
         WeatherService(
-            weatherRepository = weatherRepository,
-            validationService = validationService
+            weatherRepository = weatherRepository
         )
     }
 

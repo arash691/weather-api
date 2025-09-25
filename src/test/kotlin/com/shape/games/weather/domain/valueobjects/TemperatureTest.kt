@@ -2,7 +2,9 @@ package com.shape.games.weather.domain.valueobjects
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class TemperatureTest {
 
@@ -74,7 +76,7 @@ class TemperatureUnitTest {
         assertEquals(TemperatureUnit.CELSIUS, TemperatureUnit.fromString("celsius").getOrThrow())
         assertEquals(TemperatureUnit.CELSIUS, TemperatureUnit.fromString("c").getOrThrow())
         assertEquals(TemperatureUnit.CELSIUS, TemperatureUnit.fromString(null).getOrThrow())
-        
+
         assertEquals(TemperatureUnit.FAHRENHEIT, TemperatureUnit.fromString("fahrenheit").getOrThrow())
         assertEquals(TemperatureUnit.FAHRENHEIT, TemperatureUnit.fromString("f").getOrThrow())
     }

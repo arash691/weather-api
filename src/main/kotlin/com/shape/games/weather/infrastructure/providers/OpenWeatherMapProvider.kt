@@ -1,7 +1,6 @@
 package com.shape.games.weather.infrastructure.providers
 
 import com.shape.games.weather.domain.entities.*
-import com.shape.games.weather.domain.providers.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*

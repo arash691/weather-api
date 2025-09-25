@@ -1,7 +1,9 @@
 package com.shape.games.weather.domain.exceptions
 
 import org.junit.jupiter.api.Test
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ValidationExceptionTest {
 
@@ -11,7 +13,7 @@ class ValidationExceptionTest {
             messageKey = "validation.error.required",
             message = "Field is required"
         )
-        
+
         assertEquals("validation.error.required", exception.messageKey)
         assertEquals("Field is required", exception.message)
         assertTrue(exception.parameters.isEmpty())
@@ -28,7 +30,7 @@ class ValidationExceptionTest {
             parameters = parameters,
             message = "Value must be between {0} and {1}"
         )
-        
+
         assertEquals("validation.error.range", exception.messageKey)
         assertEquals("Value must be between {0} and {1}", exception.message)
         assertEquals(3, exception.parameters.size)
@@ -45,7 +47,7 @@ class ValidationExceptionTest {
             message = "Invalid format",
             cause = cause
         )
-        
+
         assertEquals("validation.error.format", exception.messageKey)
         assertEquals("Invalid format", exception.message)
         assertEquals(cause, exception.cause)
@@ -57,7 +59,7 @@ class NotFoundExceptionTest {
     @Test
     fun `should create not found exception`() {
         val exception = NotFoundException("Resource not found")
-        
+
         assertEquals("Resource not found", exception.message)
         assertNull(exception.cause)
         assertTrue(exception is DomainException)
@@ -67,7 +69,7 @@ class NotFoundExceptionTest {
     fun `should create not found exception with cause`() {
         val cause = IllegalStateException("Database error")
         val exception = NotFoundException("Resource not found", cause)
-        
+
         assertEquals("Resource not found", exception.message)
         assertEquals(cause, exception.cause)
     }
@@ -78,7 +80,7 @@ class RateLimitExceededExceptionTest {
     @Test
     fun `should create rate limit exception`() {
         val exception = RateLimitExceededException("Rate limit exceeded")
-        
+
         assertEquals("Rate limit exceeded", exception.message)
         assertNull(exception.cause)
         assertTrue(exception is DomainException)
@@ -90,7 +92,7 @@ class ServiceUnavailableExceptionTest {
     @Test
     fun `should create service unavailable exception`() {
         val exception = ServiceUnavailableException("Service unavailable")
-        
+
         assertEquals("Service unavailable", exception.message)
         assertNull(exception.cause)
         assertTrue(exception is DomainException)

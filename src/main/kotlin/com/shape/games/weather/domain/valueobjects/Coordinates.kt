@@ -2,7 +2,6 @@ package com.shape.games.weather.domain.valueobjects
 
 /**
  * Value object representing geographic coordinates
- * Encapsulates validation and business rules for coordinates
  */
 data class Coordinates private constructor(
     val latitude: Double,
@@ -32,7 +31,6 @@ data class Coordinates private constructor(
 
         /**
          * Parse coordinates from string format "lat,lon"
-         * Returns Result to handle parsing errors gracefully
          */
         fun fromString(coordinateString: String): Result<Coordinates> {
             return try {
@@ -60,7 +58,6 @@ data class Coordinates private constructor(
 
         /**
          * Create multiple coordinates from comma-separated string
-         * Format: "lat1,lon1,lat2,lon2,lat3,lon3"
          */
         fun fromMultipleString(coordinatesString: String): Result<List<Coordinates>> {
             return try {

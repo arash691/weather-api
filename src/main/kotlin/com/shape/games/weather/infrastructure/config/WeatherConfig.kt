@@ -8,7 +8,6 @@ data class WeatherConfig(
     val weatherProvider: WeatherProviderConfig,
     val openWeatherMap: OpenWeatherMapConfig,
     val cache: CacheConfig,
-    val validation: ValidationConfig,
     val rateLimit: RateLimitConfig,
     val api: ApiConfig
 )
@@ -36,17 +35,6 @@ data class CacheConfig(
 data class CacheTypeConfig(
     val provider: String,
     val durationMinutes: Int
-)
-
-/**
- * Validation configuration for request limits and thresholds
- */
-data class ValidationConfig(
-    val maxLocationsPerRequest: Int,
-    val minTemperatureThreshold: Double,
-    val maxTemperatureThreshold: Double,
-    val maxReasonableTemperature: Double,
-    val absoluteZeroCelsius: Double
 )
 
 /**

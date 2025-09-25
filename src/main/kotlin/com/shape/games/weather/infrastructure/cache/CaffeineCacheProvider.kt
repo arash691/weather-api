@@ -2,8 +2,6 @@ package com.shape.games.weather.infrastructure.cache
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.shape.games.weather.domain.cache.CacheProvider
-import com.shape.games.weather.domain.cache.CacheStats
 import org.slf4j.LoggerFactory
 import kotlin.time.toJavaDuration
 
@@ -11,7 +9,7 @@ import kotlin.time.toJavaDuration
  * Caffeine-based cache provider implementation
  */
 class CaffeineCacheProvider<K : Any, V : Any>(
-    private val config: com.shape.games.weather.domain.cache.CacheConfig
+    private val config: com.shape.games.weather.infrastructure.cache.CacheConfig
 ) : CacheProvider<K, V> {
 
     private val logger = LoggerFactory.getLogger(CaffeineCacheProvider::class.java)

@@ -1,4 +1,4 @@
-package com.shape.games.weather.domain.cache
+package com.shape.games.weather.infrastructure.cache
 
 import kotlin.time.Duration
 

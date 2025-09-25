@@ -65,7 +65,7 @@
             <artifactId>ktor-client-content-negotiation-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
-        
+
         <!-- Ktor Rate Limiting Plugin -->
         <dependency>
             <groupId>io.ktor</groupId>

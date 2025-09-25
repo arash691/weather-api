@@ -2,7 +2,6 @@ package com.shape.games.weather.domain.valueobjects
 
 /**
  * Value object representing a temperature value with unit
- * Encapsulates temperature conversion and validation logic
  */
 data class Temperature private constructor(
     val value: Double,

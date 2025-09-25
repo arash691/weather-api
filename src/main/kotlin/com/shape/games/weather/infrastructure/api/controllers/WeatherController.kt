@@ -2,6 +2,8 @@ package com.shape.games.weather.infrastructure.api.controllers
 
 import com.shape.games.weather.application.WeatherService
 import com.shape.games.weather.domain.exceptions.NotFoundException
+import com.shape.games.weather.infrastructure.api.extensions.getLocationWeatherParams
+import com.shape.games.weather.infrastructure.api.extensions.getWeatherSummaryParams
 import com.shape.games.weather.presentation.dto.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -23,13 +25,11 @@ class WeatherController(
         val requestId = generateRequestId()
 
         call.response.headers.append("X-Request-ID", requestId)
-        
-        val locationsParam = call.request.queryParameters["locations"]
-        val temperatureParam = call.request.queryParameters["temperature"]
-        val unitParam = call.request.queryParameters["unit"]
+
+        val params = call.getWeatherSummaryParams()
 
         val summaries = weatherService.getWeatherSummaryForFavorites(
-            locationsParam, temperatureParam, unitParam
+            params.locations, params.temperature, params.unit
         )
 
         val response = WeatherSummaryResponse(
@@ -45,9 +45,9 @@ class WeatherController(
 
         call.response.headers.append("X-Request-ID", requestId)
 
-        val locationParam = call.parameters["locationId"]
+        val params = call.getLocationWeatherParams()
 
-        val weatherDetails = weatherService.getLocationWeatherDetails(locationParam)
+        val weatherDetails = weatherService.getLocationWeatherDetails(params.locationId)
             ?: throw NotFoundException("Location not found")
 
         val response = LocationWeatherResponse(
@@ -63,7 +63,7 @@ class WeatherController(
                     date = forecast.date.toString(),
                     temperatureMin = forecast.temperatureMin.celsius,
                     temperatureMax = forecast.temperatureMax.celsius,
-                        temperatureUnit = "celsius",
+                    temperatureUnit = "celsius",
                     description = forecast.description,
                     humidity = forecast.humidity,
                     windSpeed = forecast.windSpeed,

@@ -1,4 +1,4 @@
-package com.shape.games.weather.domain.providers
+package com.shape.games.weather.infrastructure.providers
 
 import com.shape.games.weather.domain.entities.Location
 import com.shape.games.weather.domain.entities.WeatherData
@@ -84,20 +84,12 @@ sealed class WeatherProviderError(val message: String, val code: String) {
     data class RateLimitExceeded(val errorMessage: String) : WeatherProviderError(errorMessage, "RATE_LIMIT_EXCEEDED")
     data class InvalidApiKey(val errorMessage: String) : WeatherProviderError(errorMessage, "INVALID_API_KEY")
     data class LocationNotFound(val errorMessage: String) : WeatherProviderError(errorMessage, "LOCATION_NOT_FOUND")
-    data class ProviderUnavailable(val errorMessage: String) : WeatherProviderError(errorMessage, "PROVIDER_UNAVAILABLE")
+    data class ProviderUnavailable(val errorMessage: String) :
+        WeatherProviderError(errorMessage, "PROVIDER_UNAVAILABLE")
+
     data class InvalidRequest(val errorMessage: String) : WeatherProviderError(errorMessage, "INVALID_REQUEST")
     data class UnknownError(val errorMessage: String) : WeatherProviderError(errorMessage, "UNKNOWN_ERROR")
 }
-
-/**
- * Rate limit information for a provider
- */
-data class RateLimitInfo(
-    val maxRequestsPerDay: Int,
-    val remainingRequests: Int,
-    val resetTime: Long,
-    val requestsPerMinute: Int? = null
-)
 
 /**
  * Weather provider configuration

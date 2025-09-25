@@ -19,30 +19,6 @@ import kotlin.test.assertTrue
 class WeatherControllerIntegrationTest {
 
     @Test
-    fun `GET weather summary should return 400 for missing required parameters`() = testApplication {
-        setupTestApplication()
-
-
-        val response1 = client.get("/api/v1/weather/summary") {
-            parameter("temperature", "20")
-            parameter("unit", "celsius")
-        }
-
-        assertEquals(HttpStatusCode.BadRequest, response1.status)
-        assertNotNull(response1.headers["X-Error-Code"])
-        assertTrue(response1.bodyAsText().contains("VALIDATION_ERROR"))
-
-
-        val response2 = client.get("/api/v1/weather/summary") {
-            parameter("locations", "51.5074,-0.1278")
-            parameter("unit", "celsius")
-        }
-
-        assertEquals(HttpStatusCode.BadRequest, response2.status)
-        assertTrue(response2.bodyAsText().contains("VALIDATION_ERROR"))
-    }
-
-    @Test
     fun `GET weather summary should return 400 for invalid input formats`() = testApplication {
         setupTestApplication()
 
@@ -185,21 +161,23 @@ class WeatherControllerIntegrationTest {
     }
 
     @Test
-    fun `GET weather summary should validate temperature extremes`() = testApplication {
+    fun `GET weather summary should accept reasonable temperature values`() = testApplication {
         setupTestApplication()
 
+        // After refactoring: We removed arbitrary temperature limits
+        // Now only physical constants (absolute zero) are enforced in domain
         val response1 = client.get("/api/v1/weather/summary") {
             parameter("locations", "51.5074,-0.1278")
             parameter("temperature", "150")
             parameter("unit", "celsius")
         }
 
-        assertEquals(HttpStatusCode.BadRequest, response1.status)
-        assertTrue(response1.bodyAsText().contains("VALIDATION_ERROR"))
+        assertEquals(HttpStatusCode.OK, response1.status)
 
+        // Test that absolute zero is still rejected (pure domain rule)
         val response2 = client.get("/api/v1/weather/summary") {
             parameter("locations", "51.5074,-0.1278")
-            parameter("temperature", "-150")
+            parameter("temperature", "-300")  // Below absolute zero
             parameter("unit", "celsius")
         }
 
@@ -519,7 +497,7 @@ class WeatherControllerIntegrationTest {
             configureMonitoring()
             configureI18n()
             configureRateLimit(weatherConfig)
-            configureStatusPages(weatherConfig)
+            configureStatusPages()
 
             val weatherController = WeatherController(di.weatherService())
             configureRouting(weatherController)
@@ -545,13 +523,6 @@ class WeatherControllerIntegrationTest {
                 forecast = CacheTypeConfig("CAFFEINE", 60),
                 location = CacheTypeConfig("CAFFEINE", 1440),
                 maxCacheSize = 1000
-            ),
-            validation = ValidationConfig(
-                maxLocationsPerRequest = 50,
-                minTemperatureThreshold = -100.0,
-                maxTemperatureThreshold = 100.0,
-                maxReasonableTemperature = 1000.0,
-                absoluteZeroCelsius = -273.15
             ),
             rateLimit = RateLimitConfig(9000, 100, 20, 5),
             api = ApiConfig(

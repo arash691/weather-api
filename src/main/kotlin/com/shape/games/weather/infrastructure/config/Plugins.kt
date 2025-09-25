@@ -72,7 +72,7 @@ fun Application.configureI18n() {
 }
 
 
-fun Application.configureStatusPages(weatherConfig: WeatherConfig) {
+fun Application.configureStatusPages() {
     val logger = LoggerFactory.getLogger("GlobalExceptionHandler")
 
     install(StatusPages) {

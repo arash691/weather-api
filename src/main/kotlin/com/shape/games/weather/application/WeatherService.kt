@@ -4,9 +4,9 @@ import com.shape.games.weather.domain.entities.Location
 import com.shape.games.weather.domain.entities.WeatherForecast
 import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
 import com.shape.games.weather.domain.repositories.WeatherRepository
-import com.shape.games.weather.domain.services.WeatherRequestValidationService
 import com.shape.games.weather.domain.valueobjects.Coordinates
 import com.shape.games.weather.domain.valueobjects.Temperature
+import com.shape.games.weather.domain.valueobjects.TemperatureUnit
 import com.shape.games.weather.presentation.dto.LocationSummaryDto
 import org.slf4j.LoggerFactory
 
@@ -15,8 +15,7 @@ import org.slf4j.LoggerFactory
  * Orchestrates domain services and handles cross-cutting concerns
  */
 class WeatherService(
-    private val weatherRepository: WeatherRepository,
-    private val validationService: WeatherRequestValidationService
+    private val weatherRepository: WeatherRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(WeatherService::class.java)
@@ -30,31 +29,35 @@ class WeatherService(
         unitParam: String?
     ): List<LocationSummaryDto> {
 
-        val validationResult = validationService.validateWeatherSummaryRequest(
-            locationsParam, temperatureParam, unitParam
-        )
 
-        if (validationResult.isFailure) {
-            throw validationResult.exceptionOrNull()!!
+        val coordinates = Coordinates.fromMultipleString(locationsParam!!).getOrElse {
+            throw it
         }
 
-        val requestData = validationResult.getOrThrow()
+
+        val unit = TemperatureUnit.fromString(unitParam).getOrElse {
+            throw it
+        }
+
+        val temperatureThreshold = Temperature.fromString(temperatureParam!!, unit).getOrElse {
+            throw it
+        }
 
         logger.info(
             "Getting weather summary for {} locations with temp > {}",
-            requestData.coordinates.size, requestData.temperatureThreshold.format()
+            coordinates.size, temperatureThreshold.format()
         )
 
         val summaries = mutableListOf<LocationSummaryDto>()
 
-        for (coordinates in requestData.coordinates) {
+        for (coordinate in coordinates) {
             try {
-                val summary = getLocationSummary(coordinates, requestData.temperatureThreshold)
+                val summary = getLocationSummary(coordinate, temperatureThreshold)
                 if (summary != null) {
                     summaries.add(summary)
                 }
             } catch (e: Exception) {
-                logger.error("Error processing location ${coordinates.toCoordinateString()}", e)
+                logger.error("Error processing location ${coordinate.toCoordinateString()}", e)
             }
         }
 
@@ -63,13 +66,9 @@ class WeatherService(
 
     suspend fun getLocationWeatherDetails(locationParam: String?): LocationWeatherDetails? {
 
-        val validationResult = validationService.validateLocationWeatherRequest(locationParam)
-
-        if (validationResult.isFailure) {
-            throw validationResult.exceptionOrNull()!!
+        val coordinates = Coordinates.fromString(locationParam!!).getOrElse {
+            throw it
         }
-
-        val coordinates = validationResult.getOrThrow()
 
         logger.info("Getting weather details for location: {}", coordinates.toCoordinateString())
 

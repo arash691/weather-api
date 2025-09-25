@@ -1,14 +1,17 @@
 # Weather API
 
-A Kotlin/Ktor weather integration service that wraps OpenWeatherMap API with rate limiting and caching. Built this to avoid hitting API limits while providing a clean interface for weather data.
+A Kotlin/Ktor weather integration service that wraps OpenWeatherMap API with rate limiting and caching. Built this to
+avoid hitting API limits while providing a clean interface for weather data.
 
 ## What it does
 
 Two main endpoints:
+
 - Get weather summary for multiple locations (only returns places where tomorrow will be warmer than your threshold)
 - Get detailed 5-day forecast for a specific location
 
-The API sits between your app and OpenWeatherMap, handling rate limits, caching responses, and providing a cleaner interface.
+The API sits between your app and OpenWeatherMap, handling rate limits, caching responses, and providing a cleaner
+interface.
 
 ## Quick Start
 
@@ -21,6 +24,7 @@ mvn exec:java
 Server starts on `http://localhost:8080`
 
 ### Get your API key
+
 1. Sign up at [OpenWeatherMap](https://openweathermap.org/api)
 2. Update `src/main/resources/application.yaml` with your key
 
@@ -45,7 +49,8 @@ curl "http://localhost:8080/api/v1/weather/locations/51.5074,-0.1278"
 
 **Infrastructure layer** = All the messy external stuff. HTTP clients, caches, configuration files.
 
-This means you can change from OpenWeatherMap to other providers without touching business logic. Or swap Caffeine cache for Redis.
+This means you can change from OpenWeatherMap to other providers without touching business logic. Or swap Caffeine cache
+for Redis.
 
 ## Configuration
 
@@ -88,7 +93,8 @@ Three layers of protection:
 - **Forecasts**: 1 hour (more stable)
 - **Location info**: 24 hours (rarely changes)
 
-Cache keys include coordinates, so different locations don't interfere. Uses Caffeine for in-memory caching (fast, but doesn't survive restarts).
+Cache keys include coordinates, so different locations don't interfere. Uses Caffeine for in-memory caching (fast, but
+doesn't survive restarts).
 
 ## Testing
 
@@ -102,6 +108,5 @@ mvn test -Dtest="*Test"
 # Just integration tests  
 mvn test -Dtest="*IntegrationTest"
 ```
-
 
 Built with Ktor 3.3.0, Kotlin 2.2.20, and way too much coffee :)

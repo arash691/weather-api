@@ -1,13 +1,13 @@
 package com.shape.games.weather.infrastructure.factories
 
-import com.shape.games.weather.domain.cache.CacheConfig
-import com.shape.games.weather.domain.cache.CacheProvider
-import com.shape.games.weather.domain.cache.CacheProviderType
-import com.shape.games.weather.domain.providers.WeatherProvider
-import com.shape.games.weather.domain.providers.WeatherProviderConfig
-import com.shape.games.weather.domain.providers.WeatherProviderType
+import com.shape.games.weather.infrastructure.cache.CacheConfig
+import com.shape.games.weather.infrastructure.cache.CacheProvider
+import com.shape.games.weather.infrastructure.cache.CacheProviderType
 import com.shape.games.weather.infrastructure.cache.CaffeineCacheProvider
 import com.shape.games.weather.infrastructure.providers.OpenWeatherMapProvider
+import com.shape.games.weather.infrastructure.providers.WeatherProvider
+import com.shape.games.weather.infrastructure.providers.WeatherProviderConfig
+import com.shape.games.weather.infrastructure.providers.WeatherProviderType
 import io.ktor.client.*
 
 /**
