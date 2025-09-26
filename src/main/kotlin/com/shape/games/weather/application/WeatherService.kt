@@ -7,6 +7,7 @@ import com.shape.games.weather.domain.repositories.WeatherRepository
 import com.shape.games.weather.domain.valueobjects.Coordinates
 import com.shape.games.weather.domain.valueobjects.Temperature
 import com.shape.games.weather.domain.valueobjects.TemperatureUnit
+import com.shape.games.weather.infrastructure.config.ApiConfig
 import com.shape.games.weather.presentation.dto.LocationSummaryDto
 import org.slf4j.LoggerFactory
 
@@ -15,7 +16,8 @@ import org.slf4j.LoggerFactory
  * Orchestrates domain services and handles cross-cutting concerns
  */
 class WeatherService(
-    private val weatherRepository: WeatherRepository
+    private val weatherRepository: WeatherRepository,
+    private val apiConfig: ApiConfig
 ) {
 
     private val logger = LoggerFactory.getLogger(WeatherService::class.java)
@@ -120,7 +122,7 @@ class WeatherService(
     }
 
     private suspend fun getForecastForLocation(location: Location): WeatherForecast? {
-        return weatherRepository.getForecast(location, 5)
+        return weatherRepository.getForecast(location, apiConfig.defaultForecastDays)
     }
 }
 

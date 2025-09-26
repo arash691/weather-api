@@ -127,7 +127,8 @@ class DependencyInjection(private val config: WeatherConfig) {
     private val weatherService: WeatherService by lazy {
         logger.info("Initializing weather application service")
         WeatherService(
-            weatherRepository = weatherRepository
+            weatherRepository = weatherRepository,
+            apiConfig = config.api
         )
     }
 
