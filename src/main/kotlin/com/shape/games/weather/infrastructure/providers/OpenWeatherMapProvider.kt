@@ -1,10 +1,12 @@
 package com.shape.games.weather.infrastructure.providers
 
 import com.shape.games.weather.domain.entities.*
+import com.shape.games.weather.domain.valueobjects.Coordinates
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.datetime.*
 import kotlinx.serialization.Serializable
 import org.slf4j.LoggerFactory
 
@@ -243,29 +245,36 @@ private fun OpenWeatherMapWeatherResponse.toWeatherData(): WeatherData {
 }
 
 private fun OpenWeatherMapForecastResponse.toWeatherForecast(): WeatherForecast {
-    val dailyForecasts = list.groupBy { it.dt / 86400 } // Group by day
-        .values
-        .map { dayForecasts ->
-            val day = dayForecasts.first()
-            val minTemp = dayForecasts.minOf { it.main.temp_min }
-            val maxTemp = dayForecasts.maxOf { it.main.temp_max }
-            val avgHumidity = dayForecasts.map { it.main.humidity }.average().toInt()
-            val avgWindSpeed = dayForecasts.map { it.wind.speed }.average()
-            val description = dayForecasts.map { it.weather.firstOrNull()?.description ?: "Unknown" }
-                .groupingBy { it }
-                .eachCount()
-                .maxByOrNull { it.value }?.key ?: "Unknown"
+    val location = city
+    val coordinates = Coordinates.of(location.coord.lat, location.coord.lon)
+    
+    // Group forecasts by local date (timezone-aware)
+    val dailyForecasts = list.groupBy { forecastItem ->
+        // Convert timestamp to local date for this location
+        val instant = Instant.fromEpochSeconds(forecastItem.dt)
+        val approximateTimezone = coordinates.getApproximateTimezone()
+        instant.toLocalDateTime(approximateTimezone).date
+    }.map { (date, dayForecasts) ->
+        val minTemp = dayForecasts.minOf { it.main.temp_min }
+        val maxTemp = dayForecasts.maxOf { it.main.temp_max }
+        val avgHumidity = dayForecasts.map { it.main.humidity }.average().toInt()
+        val avgWindSpeed = dayForecasts.map { it.wind.speed }.average()
+        val description = dayForecasts.map { it.weather.firstOrNull()?.description ?: "Unknown" }
+            .groupingBy { it }
+            .eachCount()
+            .maxByOrNull { it.value }?.key ?: "Unknown"
+        val avgPressure = dayForecasts.map { it.main.pressure }.average().toInt()
 
-            DailyForecast(
-                date = kotlinx.datetime.LocalDate.fromEpochDays((day.dt / 86400).toInt()),
-                temperatureMin = Temperature(minTemp),
-                temperatureMax = Temperature(maxTemp),
-                humidity = avgHumidity,
-                windSpeed = avgWindSpeed,
-                description = description,
-                pressure = day.main.pressure
-            )
-        }
+        DailyForecast(
+            date = date,
+            temperatureMin = Temperature(minTemp),
+            temperatureMax = Temperature(maxTemp),
+            humidity = avgHumidity,
+            windSpeed = avgWindSpeed,
+            description = description,
+            pressure = avgPressure
+        )
+    }.sortedBy { it.date }
 
     return WeatherForecast(
         location = Location(
@@ -288,3 +297,4 @@ private fun OpenWeatherMapLocationResponse.toLocation(): Location {
         country = country
     )
 }
+

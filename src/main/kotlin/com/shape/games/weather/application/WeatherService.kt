@@ -92,11 +92,8 @@ class WeatherService(
         val location = getLocationByCoordinates(coordinates) ?: return null
         val forecast = getForecastForLocation(location) ?: return null
 
-        val tomorrow = forecast.forecasts.getOrNull(1)?.date
-            ?: forecast.forecasts.firstOrNull()?.date
-
-        val tomorrowForecast = forecast.forecasts.find { it.date == tomorrow }
-            ?: return null
+        // Use timezone-aware calculation to find tomorrow's forecast
+        val tomorrowForecast = coordinates.findTomorrowForecast(forecast.forecasts) ?: return null
 
         val maxTempDomain = Temperature.celsius(
             tomorrowForecast.temperatureMax.celsius

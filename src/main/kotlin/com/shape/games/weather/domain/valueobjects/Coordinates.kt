@@ -1,5 +1,7 @@
 package com.shape.games.weather.domain.valueobjects
 
+import kotlinx.datetime.*
+
 /**
  * Value object representing geographic coordinates
  */
@@ -20,6 +22,75 @@ data class Coordinates private constructor(
      * Format coordinates as string for external APIs
      */
     fun toCoordinateString(): String = "$latitude,$longitude"
+
+    /**
+     * Calculate approximate timezone from longitude
+     * Each 15 degrees of longitude represents approximately 1 hour of time difference
+     * This is a simplified calculation - real timezones are more complex
+     * 
+     * @return Approximate timezone for this location
+     */
+    fun getApproximateTimezone(): TimeZone {
+        // Each 15 degrees of longitude represents approximately 1 hour of time difference
+        val hoursOffset = (longitude / 15.0).toInt()
+        
+        // Clamp to reasonable timezone range (-12 to +14)
+        val clampedOffset = hoursOffset.coerceIn(-12, 14)
+        
+        return if (clampedOffset >= 0) {
+            TimeZone.of("UTC+$clampedOffset")
+        } else {
+            TimeZone.of("UTC$clampedOffset") // Negative sign already included
+        }
+    }
+
+    /**
+     * Get today's date for this location based on its approximate timezone
+     * 
+     * @return Today's date in this location's approximate timezone
+     */
+    fun getTodayForLocation(): LocalDate {
+        val approximateTimezone = getApproximateTimezone()
+        val now = Clock.System.now()
+        return now.toLocalDateTime(approximateTimezone).date
+    }
+
+    /**
+     * Calculate tomorrow's date for this location based on its approximate timezone
+     * 
+     * @return Tomorrow's date in this location's approximate timezone
+     */
+    fun getTomorrowForLocation(): LocalDate {
+        val approximateTimezone = getApproximateTimezone()
+        val now = Clock.System.now()
+        val localDateTime = now.toLocalDateTime(approximateTimezone)
+        return localDateTime.date.plus(1, DateTimeUnit.DAY)
+    }
+
+    /**
+     * Check if a date represents "tomorrow" for this location
+     * 
+     * @param date The date to check
+     * @return true if the date is tomorrow for this location
+     */
+    fun isTomorrow(date: LocalDate): Boolean {
+        val tomorrow = getTomorrowForLocation()
+        return date == tomorrow
+    }
+
+    /**
+     * Find the forecast for tomorrow in a list of daily forecasts
+     * Uses location-aware date calculation instead of assuming array position
+     * 
+     * @param forecasts List of daily forecasts
+     * @return Tomorrow's forecast or null if not found
+     */
+    fun findTomorrowForecast(
+        forecasts: List<com.shape.games.weather.domain.entities.DailyForecast>
+    ): com.shape.games.weather.domain.entities.DailyForecast? {
+        val tomorrow = getTomorrowForLocation()
+        return forecasts.find { it.date == tomorrow }
+    }
 
     companion object {
         /**
