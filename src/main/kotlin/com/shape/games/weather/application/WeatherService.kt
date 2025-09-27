@@ -1,14 +1,14 @@
 package com.shape.games.weather.application
 
 import com.shape.games.weather.domain.entities.Location
+import com.shape.games.weather.domain.entities.LocationSummary
 import com.shape.games.weather.domain.entities.WeatherForecast
 import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
 import com.shape.games.weather.domain.repositories.WeatherRepository
+import com.shape.games.weather.domain.services.WeatherConfigService
 import com.shape.games.weather.domain.valueobjects.Coordinates
 import com.shape.games.weather.domain.valueobjects.Temperature
 import com.shape.games.weather.domain.valueobjects.TemperatureUnit
-import com.shape.games.weather.infrastructure.config.ApiConfig
-import com.shape.games.weather.presentation.dto.LocationSummaryDto
 import org.slf4j.LoggerFactory
 
 /**
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
  */
 class WeatherService(
     private val weatherRepository: WeatherRepository,
-    private val apiConfig: ApiConfig
+    private val weatherConfigService: WeatherConfigService
 ) {
 
     private val logger = LoggerFactory.getLogger(WeatherService::class.java)
@@ -29,7 +29,7 @@ class WeatherService(
         locationsParam: String?,
         temperatureParam: String?,
         unitParam: String?
-    ): List<LocationSummaryDto> {
+    ): List<LocationSummary> {
 
 
         val coordinates = Coordinates.fromMultipleString(locationsParam!!).getOrElse {
@@ -50,7 +50,7 @@ class WeatherService(
             coordinates.size, temperatureThreshold.format()
         )
 
-        val summaries = mutableListOf<LocationSummaryDto>()
+        val summaries = mutableListOf<LocationSummary>()
 
         for (coordinate in coordinates) {
             try {
@@ -88,7 +88,7 @@ class WeatherService(
     private suspend fun getLocationSummary(
         coordinates: Coordinates,
         temperatureThreshold: Temperature
-    ): LocationSummaryDto? {
+    ): LocationSummary? {
         val location = getLocationByCoordinates(coordinates) ?: return null
         val forecast = getForecastForLocation(location) ?: return null
 
@@ -100,7 +100,7 @@ class WeatherService(
         )
 
         return if (maxTempDomain.isAbove(temperatureThreshold)) {
-            LocationSummaryDto(
+            LocationSummary(
                 locationId = coordinates.toCoordinateString(),
                 locationName = location.name,
                 country = location.country,
@@ -119,7 +119,7 @@ class WeatherService(
     }
 
     private suspend fun getForecastForLocation(location: Location): WeatherForecast? {
-        return weatherRepository.getForecast(location, apiConfig.defaultForecastDays)
+        return weatherRepository.getForecast(location, weatherConfigService.getDefaultForecastDays())
     }
 }
 

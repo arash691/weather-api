@@ -4,9 +4,9 @@ import com.shape.games.weather.domain.exceptions.NotFoundException
 import com.shape.games.weather.domain.exceptions.RateLimitExceededException
 import com.shape.games.weather.domain.exceptions.ServiceUnavailableException
 import com.shape.games.weather.domain.exceptions.ValidationException
-import com.shape.games.weather.presentation.dto.ErrorDetails
-import com.shape.games.weather.presentation.dto.ErrorResponse
-import com.shape.games.weather.presentation.dto.ResponseMetadata
+import com.shape.games.com.shape.games.weather.infrastructure.api.dto.ErrorDetails
+import com.shape.games.com.shape.games.weather.infrastructure.api.dto.ErrorResponse
+import com.shape.games.com.shape.games.weather.infrastructure.api.dto.ResponseMetadata
 import io.ktor.http.*
 import io.ktor.i18n.*
 import io.ktor.serialization.kotlinx.json.*
@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.text.MessageFormat
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 fun Application.configureHTTP() {
     install(CORS) {
@@ -196,8 +198,8 @@ suspend fun ApplicationCall.respondError(
             details = details
         ),
         metadata = ResponseMetadata(
-            timestamp = Instant.now().atOffset(java.time.ZoneOffset.UTC)
-                .format(java.time.format.DateTimeFormatter.ISO_INSTANT),
+            timestamp = Instant.now().atOffset(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_INSTANT),
             requestId = requestId
         )
     )

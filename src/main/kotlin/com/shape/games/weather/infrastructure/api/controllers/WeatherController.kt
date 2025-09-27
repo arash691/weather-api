@@ -1,10 +1,15 @@
 package com.shape.games.weather.infrastructure.api.controllers
 
+import com.shape.games.com.shape.games.weather.infrastructure.api.dto.DailyForecastDto
+import com.shape.games.com.shape.games.weather.infrastructure.api.dto.LocationDto
+import com.shape.games.com.shape.games.weather.infrastructure.api.dto.LocationSummaryDto
+import com.shape.games.com.shape.games.weather.infrastructure.api.dto.LocationWeatherResponse
+import com.shape.games.com.shape.games.weather.infrastructure.api.dto.ResponseMetadata
+import com.shape.games.com.shape.games.weather.infrastructure.api.dto.WeatherSummaryResponse
 import com.shape.games.weather.application.WeatherService
 import com.shape.games.weather.domain.exceptions.NotFoundException
 import com.shape.games.weather.infrastructure.api.extensions.getLocationWeatherParams
 import com.shape.games.weather.infrastructure.api.extensions.getWeatherSummaryParams
-import com.shape.games.weather.presentation.dto.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -28,9 +33,21 @@ class WeatherController(
 
         val params = call.getWeatherSummaryParams()
 
-        val summaries = weatherService.getWeatherSummaryForFavorites(
+        val domainSummaries = weatherService.getWeatherSummaryForFavorites(
             params.locations, params.temperature, params.unit
         )
+
+        // Map domain objects to DTOs
+        val summaries = domainSummaries.map { domainSummary ->
+            LocationSummaryDto(
+                locationId = domainSummary.locationId,
+                locationName = domainSummary.locationName,
+                country = domainSummary.country,
+                tomorrowMaxTemperature = domainSummary.tomorrowMaxTemperature,
+                temperatureUnit = domainSummary.temperatureUnit,
+                weatherDescription = domainSummary.weatherDescription
+            )
+        }
 
         val response = WeatherSummaryResponse(
             locations = summaries,

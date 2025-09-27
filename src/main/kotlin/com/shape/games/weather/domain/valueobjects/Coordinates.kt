@@ -40,7 +40,7 @@ data class Coordinates private constructor(
         return if (clampedOffset >= 0) {
             TimeZone.of("UTC+$clampedOffset")
         } else {
-            TimeZone.of("UTC$clampedOffset") // Negative sign already included
+            TimeZone.of("UTC$clampedOffset")
         }
     }
 

@@ -1,6 +1,7 @@
 package com.shape.games.weather.infrastructure.di
 
 import com.shape.games.weather.application.WeatherService
+import com.shape.games.weather.infrastructure.services.WeatherConfigServiceImpl
 import com.shape.games.weather.domain.entities.Location
 import com.shape.games.weather.domain.entities.WeatherData
 import com.shape.games.weather.domain.entities.WeatherForecast
@@ -124,11 +125,16 @@ class DependencyInjection(private val config: WeatherConfig) {
     }
 
 
+    private val weatherConfigService by lazy {
+        logger.info("Initializing weather config service")
+        WeatherConfigServiceImpl(config.api)
+    }
+
     private val weatherService: WeatherService by lazy {
         logger.info("Initializing weather application service")
         WeatherService(
             weatherRepository = weatherRepository,
-            apiConfig = config.api
+            weatherConfigService = weatherConfigService
         )
     }
 

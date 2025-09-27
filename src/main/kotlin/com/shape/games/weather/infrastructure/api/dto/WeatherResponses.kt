@@ -1,4 +1,4 @@
-package com.shape.games.weather.presentation.dto
+package com.shape.games.com.shape.games.weather.infrastructure.api.dto
 
 import kotlinx.serialization.Serializable
 
